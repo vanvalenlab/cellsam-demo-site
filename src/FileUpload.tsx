@@ -152,6 +152,14 @@ const FileUpload = () => {
     setIsLoading(false);
   };
 
+  // Clear function
+  const clearState = () => {
+    setUploadedImageFile(null);
+    setOverlayImage(null);
+    setIsLoading(false);
+    setErrorMessage(null);
+  };
+
   return (
     <div>
       {errorMessage && (
@@ -160,7 +168,10 @@ const FileUpload = () => {
           severity="error"
           text={errorMessage}
           className="mb-1"
-          onClose={() => setErrorMessage(null)}
+          onClose={() => {
+            setErrorMessage(null);
+            clearState();
+          }}
         />
       )}
 
@@ -197,6 +208,18 @@ const FileUpload = () => {
           <p className="text-lg font-semibold">Upload file</p>
         </label>
       </div>
+      {(uploadedImageFile || overlayImage) && (
+        <div className="flex flex-row justify-center items-center">
+          <button
+            onClick={() => {
+              clearState();
+            }}
+            className="bg-gray-100 p-2 px-5 rounded text-black hover:bg-gray-200 flex justify-center items-center"
+          >
+            Clear
+          </button>
+        </div>
+      )}
       <div className="flex flex-row justify-center items-center">
         {uploadedImageFile && (
           <div className="flex flex-col pt-5">
