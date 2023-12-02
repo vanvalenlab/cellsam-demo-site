@@ -92,3 +92,17 @@ code {
   height: auto;
   border-radius: 8px;
 }
+
+/* header 8 */
+.bg-material-ui-blue {
+  background-color: white /* #2196F3; /* Material UI Blue */
+}
+
+.text-white {
+  color: black; /* White text */
+}
+
+.text-white:hover, .text-white-700:hover {
+  color: #2196F3; /* Lighter blue for hover effect, adjust as needed */
+}
+
