@@ -2,6 +2,7 @@ import React from "react";
 import FileUpload from "./FileUpload";
 import Header from "./Header";
 import DownloadButton from "./Download";
+import Gallery from "./Gallery";
 
 function App() {
   return (
@@ -121,9 +122,21 @@ function App() {
                 </li>
               </ul>
             </div>
-            <DownloadButton />
           </div>
         </div>
+
+        <div
+          className="rounded-md px-4 py-4 border border-gray-500 max-w-[700px] w-full m-auto mt-4"
+        >
+        <div>
+          <h3 className="text-xl font-bold text-gray-800 mb-4">
+            Download Sample Data
+          </h3>
+          <Gallery />
+        </div>
+      </div>
+
+
         {/* </section> */}
       </main>
     </div>

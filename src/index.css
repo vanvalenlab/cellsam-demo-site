@@ -45,3 +45,50 @@ code {
   color: white;
   background-color: #4CAF50; /* Green background on hover */
 }
+
+/* Gallery stuff */
+.sample-data-section {
+  text-align: center;
+  padding: 40px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  margin: 40px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: transparent; /* Set background to transparent */
+}
+
+
+.section-title {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+
+/* Ensure no background color for gallery container */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  /* No background-color property here */
+}
+
+.gallery-item {
+  display: block;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  transition: transform 0.3s, border-color 0.3s;
+}
+
+.gallery-item:hover, .gallery-item:focus {
+  transform: scale(1.05); /* Slightly enlarge on hover */
+  border-color: #4CAF50; /* Green border on hover */
+}
+
+.gallery-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
