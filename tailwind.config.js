@@ -4,9 +4,4 @@ module.exports = {
     extend: {},
   },
   plugins: [],
-  extend: {
-    fontFamily: {
-      sans: ["Roboto", "sans-serif"],
-    },
-  },
 };
