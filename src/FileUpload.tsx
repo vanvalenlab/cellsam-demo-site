@@ -114,6 +114,7 @@ const FileUpload = () => {
       );
 
       if (response.ok) {
+        console.log(response);
         const blob = await response.blob();
         JSZip.loadAsync(blob).then((zip) => {
           Object.keys(zip.files).forEach((filename) => {
