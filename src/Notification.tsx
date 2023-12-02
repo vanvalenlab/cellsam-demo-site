@@ -69,6 +69,17 @@ const Notification: React.FC<NotificationProps> = ({
     );
   };
 
+  // Background color classes
+  const bgColorClass = severity === "error" ? "bg-rose-50" : "bg-amber-50";
+  const textColorClass =
+    severity === "error" ? "text-rose-700" : "text-amber-700";
+  const buttonBgColorClass =
+    severity === "error" ? "bg-rose-50" : "bg-amber-50";
+  const buttonTextColorClass =
+    severity === "error" ? "text-rose-500" : "text-amber-500";
+  const buttonHoverBgColorClass =
+    severity === "error" ? "hover:bg-rose-100" : "hover:bg-amber-100";
+
   return (
     <Transition
       show={show}
@@ -80,33 +91,17 @@ const Notification: React.FC<NotificationProps> = ({
       leaveFrom="opacity-100"
       leaveTo="opacity-0"
     >
-      <div
-        className={`rounded-md p-4 ${className} bg-${
-          severity === "error" ? "rose" : "amber"
-        }-50`}
-      >
+      <div className={`rounded-md p-4 ${className} ${bgColorClass}`}>
         <div className="flex items-center">
           <div className="flex-shrink-0">{getIcon()}</div>
           <div className="ml-3">
-            <p
-              className={`text-sm font-medium text-${
-                severity === "error" ? "rose" : "amber"
-              }-700`}
-            >
-              {text}
-            </p>
+            <p className={`text-sm font-medium ${textColorClass}`}>{text}</p>
           </div>
           {!hideCloseButton && (
             <div className="ml-auto pl-3">
               <button
                 type="button"
-                className={`inline-flex rounded-md bg-${
-                  severity === "error" ? "rose" : "amber"
-                }-50 p-1.5 text-${
-                  severity === "error" ? "rose" : "amber"
-                }-500 hover:bg-${
-                  severity === "error" ? "rose" : "amber"
-                }-100 focus:outline-none`}
+                className={`inline-flex rounded-md ${buttonBgColorClass} p-1.5 ${buttonTextColorClass} ${buttonHoverBgColorClass} focus:outline-none`}
                 onClick={onClose}
               >
                 <svg

@@ -149,6 +149,7 @@ const FileUpload = () => {
           show={true}
           severity="error"
           text={errorMessage}
+          className="mb-1"
           onClose={() => setErrorMessage(null)}
         />
       )}
