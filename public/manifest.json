@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "CellSAM",
+  "name": "CellSAM by DeepCell",
   "icons": [
     {
       "src": "favicon.ico",
