@@ -149,7 +149,7 @@ const FileUpload = () => {
       </div>
       <div className="flex flex-row justify-center items-center">
         {uploadedImageFile && (
-          <div className="flex justify-center items-center h-[80vh] w-full pt-5">
+          <div className="flex justify-center items-center w-full pt-5">
             <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto">
               <img
                 src={URL.createObjectURL(uploadedImageFile)}
@@ -168,7 +168,7 @@ const FileUpload = () => {
           </div>
         )}
         {overlayImage && (
-          <div className="flex justify-center items-center h-[80vh] w-full pt-5">
+          <div className="flex justify-center items-center w-full pt-5">
             <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto">
               <img
                 src={overlayImage}
