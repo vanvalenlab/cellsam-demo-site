@@ -114,6 +114,9 @@ function App() {
                 <li>
                   Other formats or channel configurations will throw an error.
                 </li>
+                <li>
+                  The computed mask is available for download as a <code>.npy</code> file.
+                </li>
               </ul>
             </div>
           </div>
