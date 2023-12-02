@@ -111,7 +111,7 @@ function App() {
               }}
             >
               <ul className="list-disc list-inside pl-6">
-                <li>Images should be in PNG format.</li>
+                <li>Images should be in PNG format, and be less than 1024 pixels along each axis.</li>
                 <li>
                   Acceptable channels: single channel, 2 channel (nuclear and
                   whole cell), or 3 channel (blank, nuclear, and whole cell).
