@@ -57,6 +57,7 @@ const FileUpload = () => {
   const [highlight, setHighlight] = useState(false);
   const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
   const [overlayImage, setOverlayImage] = useState<string | null>(null);
+  const [overlayMask, setOverlayMask] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -89,7 +90,7 @@ const FileUpload = () => {
     link.download = "downloaded_image"; // Set the download file name
 
     if (returnedImage) {
-      link.download = "downloaded_image.png"; // Set the extension directly
+      link.download = "downloaded_mask.npy"; // Set the extension directly
     }
 
     document.body.appendChild(link);
@@ -125,6 +126,14 @@ const FileUpload = () => {
                 file.async("blob").then((pngBlob) => {
                   const imageUrl = URL.createObjectURL(pngBlob);
                   setOverlayImage(imageUrl); // Assuming setOverlayImage is your state setter
+                });
+              }
+            } else if (filename.endsWith("mask.npy")) {
+              const file = zip.file(filename);
+              if (file) {
+                file.async("blob").then((b) => {
+                  const imageUrl = URL.createObjectURL(b);
+                  setOverlayMask(imageUrl); // Assuming setOverlayImage is your state setter
                 });
               }
             }
@@ -236,7 +245,13 @@ const FileUpload = () => {
                       className="max-w-full max-h-full object-contain"
                     />
                     <button
-                      onClick={() => downloadImage(overlayImage, true)}
+                      onClick={() => {
+                        if (overlayMask) {
+                          downloadImage(overlayMask, true);
+                        } else {
+                          downloadImage(overlayImage, true);
+                        }
+                      }}
                       className="absolute top-2 right-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center"
                     >
                       <DownloadIcon className="h-5 w-5" />
