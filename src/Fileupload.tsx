@@ -147,42 +147,44 @@ const FileUpload = () => {
           <p className="text-lg font-semibold">Upload file</p>
         </label>
       </div>
-      {uploadedImageFile && (
-        <div className="flex justify-center items-center h-[80vh] w-full pt-5">
-          <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto">
-            <img
-              src={URL.createObjectURL(uploadedImageFile)}
-              alt="Uploaded"
-              className="max-w-full max-h-full object-contain"
-            />
-            <button
-              onClick={() =>
-                downloadImage(URL.createObjectURL(uploadedImageFile))
-              }
-              className="absolute top-2 right-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center"
-            >
-              <DownloadIcon className="h-5 w-5" />
-            </button>
+      <div className="flex flex-row justify-center items-center">
+        {uploadedImageFile && (
+          <div className="flex justify-center items-center h-[80vh] w-full pt-5">
+            <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto">
+              <img
+                src={URL.createObjectURL(uploadedImageFile)}
+                alt="Uploaded"
+                className="max-w-full max-h-full object-contain"
+              />
+              <button
+                onClick={() =>
+                  downloadImage(URL.createObjectURL(uploadedImageFile))
+                }
+                className="absolute top-2 right-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center"
+              >
+                <DownloadIcon className="h-5 w-5" />
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-      {overlayImage && (
-        <div className="flex justify-center items-center h-[80vh] w-full pt-5">
-          <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto">
-            <img
-              src={overlayImage}
-              alt="Overlay"
-              className="max-w-full max-h-full object-contain"
-            />
-            <button
-              onClick={() => downloadImage(overlayImage, true)}
-              className="absolute top-2 right-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center"
-            >
-              <DownloadIcon className="h-5 w-5" />
-            </button>
+        )}
+        {overlayImage && (
+          <div className="flex justify-center items-center h-[80vh] w-full pt-5">
+            <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto">
+              <img
+                src={overlayImage}
+                alt="Overlay"
+                className="max-w-full max-h-full object-contain"
+              />
+              <button
+                onClick={() => downloadImage(overlayImage, true)}
+                className="absolute top-2 right-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center"
+              >
+                <DownloadIcon className="h-5 w-5" />
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
