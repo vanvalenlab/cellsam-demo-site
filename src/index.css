@@ -12,11 +12,36 @@ body {
 }
 
 * {
-  font-family: 'Nunito Sans', sans-serif !important;
+  font-family: 'Sen', sans-serif !important;
 }
 
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+.download-button-container {
+  text-align: center;
+  margin-top: 20px;
+}
+.download-button-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.download-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  border: 2px solid #4CAF50; /* Green border */
+  color: #4CAF50; /* Green text */
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s, border-color 0.3s, background-color 0.3s;
+}
+
+.download-btn:hover, .download-btn:focus {
+  color: white;
+  background-color: #4CAF50; /* Green background on hover */
 }
