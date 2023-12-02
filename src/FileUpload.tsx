@@ -223,7 +223,7 @@ const FileUpload = () => {
       <div className="flex flex-row justify-center items-center">
         {uploadedImageFile && (
           <div className="flex flex-col pt-5">
-            <p className="ml-5 text-lg font-semibold">Your image</p>
+            <p className="ml-5 text-lg font-semibold">Input image</p>
 
             <div className="flex justify-center items-center w-full">
               <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto">
@@ -247,7 +247,7 @@ const FileUpload = () => {
 
         <div className="flex flex-col pt-5">
           {overlayImage && !isLoading && (
-            <p className="ml-5 text-lg font-semibold">The result</p>
+            <p className="ml-5 text-lg font-semibold">Mask outlines</p>
           )}
 
           <div className="flex justify-center items-center w-full">
