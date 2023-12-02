@@ -4,20 +4,19 @@
 
 body {
   margin: 0;
-  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 * {
-  font-family: 'Sen', sans-serif !important;
+  font-family: "Sen", sans-serif !important;
 }
 
-
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
 
@@ -33,39 +32,38 @@ code {
 .download-btn {
   display: inline-block;
   padding: 10px 20px;
-  border: 2px solid #4CAF50; /* Green border */
-  color: #4CAF50; /* Green text */
+  border: 2px solid #4caf50; /* Green border */
+  color: #4caf50; /* Green text */
   border-radius: 5px;
   text-decoration: none;
   font-weight: bold;
   transition: color 0.3s, border-color 0.3s, background-color 0.3s;
 }
 
-.download-btn:hover, .download-btn:focus {
+.download-btn:hover,
+.download-btn:focus {
   color: white;
-  background-color: #4CAF50; /* Green background on hover */
+  background-color: #4caf50; /* Green background on hover */
 }
 
 /* Gallery stuff */
 .sample-data-section {
   text-align: center;
-  padding: 40px 20px;
+  /* padding: 40px 20px; */
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  margin: 40px;
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+  /* margin: 40px; */
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
   background-color: transparent; /* Set background to transparent */
 }
 
-
 .section-title {
   font-size: 24px;
   color: #333;
   margin-bottom: 30px;
 }
-
 
 /* Ensure no background color for gallery container */
 .gallery {
@@ -82,9 +80,10 @@ code {
   transition: transform 0.3s, border-color 0.3s;
 }
 
-.gallery-item:hover, .gallery-item:focus {
+.gallery-item:hover,
+.gallery-item:focus {
   transform: scale(1.05); /* Slightly enlarge on hover */
-  border-color: #4CAF50; /* Green border on hover */
+  border-color: #4caf50; /* Green border on hover */
 }
 
 .gallery-image {

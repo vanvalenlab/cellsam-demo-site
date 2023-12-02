@@ -11,10 +11,15 @@ const images = [
 function Gallery() {
   return (
     <section className="sample-data-section">
-      <h2 className="section-title">Download Sample Data</h2>
+      {/* <h2 className="section-title">Download Sample Data</h2> */}
       <div className="gallery">
         {images.map((image, index) => (
-          <a key={index} href={image.download} download className="gallery-item">
+          <a
+            key={index}
+            href={image.download}
+            download
+            className="gallery-item"
+          >
             <img src={image.src} alt={image.alt} className="gallery-image" />
           </a>
         ))}
