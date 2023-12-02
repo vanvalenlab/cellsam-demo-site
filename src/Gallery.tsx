@@ -1,7 +1,7 @@
 import React from "react";
 
 const images = [
-  { src: "omnipose.png", alt: "Omnipose", download: "omnipose.png" },
+  { src: "tissuenet.png", alt: "TissueNet", download: "tissuenet.png" },
   { src: "ep_micro.png", alt: "Phase microscopy", download: "ep_micro.png" },
   { src: "YeaZ.png", alt: "YeaZ", download: "YeaZ.png" },
   { src: "YeastNet.png", alt: "YeastNet", download: "yeastnet.png" },
