@@ -82,15 +82,6 @@ function App() {
           </p>
         </section>
 
-        {/* <section
-          className="bg-white p-8 rounded-lg shadow-xl text-center"
-          style={{
-            maxWidth: "700px",
-            margin: "0 auto 40px auto",
-            border: "1px solid #e2e8f0",
-            boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-          }}
-        > */}
         <div
           className={`${
             // ? `bg-white dark:bg-zinc-900 dark:text-slate-400 rounded-md px-4 py-4 w-full shadow ring-1 ring-black ring-opacity-5 md:rounded-md ${props.className}`
@@ -126,21 +117,14 @@ function App() {
               </ul>
             </div>
           </div>
-        </div>
 
-        <div
-          className="rounded-md px-4 py-4 border border-gray-500 max-w-[700px] w-full m-auto mt-4"
-        >
-        <div>
+          <hr className="mt-10 mb-5" />
+
           <h3 className="text-xl font-bold text-gray-800 mb-4">
             Download Sample Data
           </h3>
           <Gallery />
         </div>
-      </div>
-
-
-        {/* </section> */}
       </main>
     </div>
   );
