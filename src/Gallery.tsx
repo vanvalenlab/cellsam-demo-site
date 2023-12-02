@@ -4,7 +4,7 @@ const images = [
   { src: "tissuenet.png", alt: "TissueNet", download: "tissuenet.png" },
   { src: "ep_micro.png", alt: "Phase microscopy", download: "ep_micro.png" },
   { src: "YeaZ.png", alt: "YeaZ", download: "YeaZ.png" },
-  { src: "YeastNet.png", alt: "YeastNet", download: "yeastnet.png" },
+  { src: "YeastNet.png", alt: "YeastNet", download: "YeastNet.png" },
   // Add more images as needed
 ];
 
