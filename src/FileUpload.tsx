@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { CSSProperties,  useCallback, useState, useEffect } from "react";
 import JSZip from "jszip";
 import Notification from "./Notification";
 import { error } from "console";
@@ -10,6 +10,19 @@ function classNames(...classes: any) {
 interface IconProps {
   className?: string;
 }
+
+
+
+const overlayStyle: CSSProperties = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  opacity: 0.5,
+  width: '100%',
+  height: '100%',
+  objectFit: 'contain' as 'contain', // Ensure the correct type is used
+};
+
 
 const DownloadIcon: React.FC<IconProps> = (props) => {
   return (
@@ -29,6 +42,8 @@ const DownloadIcon: React.FC<IconProps> = (props) => {
     </svg>
   );
 };
+
+
 
 const Spinner = () => (
   <svg
@@ -107,7 +122,8 @@ const FileUpload = () => {
       formData.append("bounding_boxes", "");
 
       const response = await fetch(
-        "https://fastapi-bgmt2kuix.brevlab.com/process_image/",
+        /*"https://fastapi-bgmt2kuix.brevlab.com/process_image/",*/
+        "http://131.215.2.187:8000/process_image/",
         {
           method: "POST",
           body: formData,
@@ -220,74 +236,40 @@ const FileUpload = () => {
           </button>
         </div>
       )}
-      <div className="flex flex-row justify-center items-center">
+            <div className="flex flex-row justify-center items-center">
         {uploadedImageFile && (
           <div className="flex flex-col pt-5">
-            <p className="ml-5 text-lg font-semibold">Input image</p>
+            <p className="ml-5 text-lg font-semibold">Image with Overlay</p>
 
-            <div className="flex justify-center items-center w-full">
-              <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto">
+            <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto">
+              <img
+                src={URL.createObjectURL(uploadedImageFile)}
+                alt="Uploaded"
+                className="max-w-full max-h-full object-contain"
+              />
+              {overlayImage && (
                 <img
-                  src={URL.createObjectURL(uploadedImageFile)}
-                  alt="Uploaded"
-                  className="max-w-full max-h-full object-contain"
+                  src={overlayImage}
+                  alt="Overlay"
+                  style={overlayStyle} // Use the overlayStyle defined earlier
                 />
-                <button
-                  onClick={() =>
-                    downloadImage(URL.createObjectURL(uploadedImageFile))
-                  }
-                  className="absolute top-2 right-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center"
-                >
-                  <DownloadIcon className="h-5 w-5" />
-                </button>
-              </div>
+              )}
+              <button
+                onClick={() =>
+                  downloadImage(URL.createObjectURL(uploadedImageFile))
+                }
+                className="absolute top-2 right-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center"
+              >
+                <DownloadIcon className="h-5 w-5" />
+              </button>
             </div>
           </div>
         )}
-
-        <div className="flex flex-col pt-5">
-          {overlayImage && !isLoading && (
-            <p className="ml-5 text-lg font-semibold">Mask outlines</p>
-          )}
-
-          <div className="flex justify-center items-center w-full">
-            <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto">
-              {isLoading && !overlayImage ? (
-                <div className="flex flex-col justify-center items-center">
-                  <p className="ml-5 text-lg font-semibold">
-                    Processing image...
-                  </p>
-                  <Spinner />
-                </div>
-              ) : (
-                overlayImage && (
-                  <>
-                    <img
-                      src={overlayImage}
-                      alt="Overlay"
-                      className="max-w-full max-h-full object-contain"
-                    />
-                    <button
-                      onClick={() => {
-                        if (overlayMask) {
-                          downloadImage(overlayMask, true);
-                        } else {
-                          downloadImage(overlayImage, true);
-                        }
-                      }}
-                      className="absolute top-2 right-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center"
-                    >
-                      <DownloadIcon className="h-5 w-5" />
-                    </button>
-                  </>
-                )
-              )}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
 };
+
+
 
 export default FileUpload;
