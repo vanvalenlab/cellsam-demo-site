@@ -22,15 +22,6 @@ const spinnerStyle: React.CSSProperties = {
   margin: '10px auto',
 };
 
-const overlayStyle: CSSProperties = {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  opacity: 0.5,
-  width: '100%',
-  height: '100%',
-  objectFit: 'contain' as 'contain', // Ensure the correct type is used
-};
 
 
 const DownloadIcon: React.FC<IconProps> = (props) => {
@@ -105,8 +96,15 @@ const FileUpload = () => {
     handleFiles(files);
   }, []);
 
+
+
   const handleFiles = useCallback((files: FileList) => {
     const file = files[0];
+    setOverlayImage(null);
+    setOverlayMask(null);
+    setIsLoading(false);
+    setErrorMessage(null);
+
     setUploadedImageFile(file);
     processImage(file);
   }, []);
@@ -263,7 +261,7 @@ const FileUpload = () => {
           {/* Update this condition to check both uploadedImageFile and overlayImage */}
           <p className="ml-5 text-lg font-semibold">{overlayImage ? 'Processed Image' : 'Input Image'}</p>
 
-          <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto">
+          <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto flex justify-center items-center">
             {/* Update the source of the image based on the available image */}
             <img
                   src={overlayImage ? overlayImage : uploadedImageFile ? URL.createObjectURL(uploadedImageFile) : ''}
