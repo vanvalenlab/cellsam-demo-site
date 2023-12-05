@@ -1,10 +1,18 @@
-import React, { CSSProperties,  useCallback, useState, useEffect } from "react";
+import React, { CSSProperties, DragEvent, ChangeEvent, useCallback, useState, useEffect } from "react";
 import JSZip from "jszip";
 import Notification from "./Notification";
-import { error } from "console";
+import ImageCanvas, { BoundingBox } from './ImageCanvas'; // Import ImageCanvas and BoundingBox type
+
+// ... other necessary imports ...
+
+
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
+}
+
+interface IconProps {
+  className?: string;
 }
 
 interface IconProps {
@@ -75,9 +83,12 @@ const FileUpload = () => {
   const [overlayMask, setOverlayMask] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  
+  const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([]);
 
 
+  const handleBoundingBoxesChange = (boxes: BoundingBox[]) => {
+    setBoundingBoxes(boxes);
+  };
 
   const handleDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -106,7 +117,6 @@ const FileUpload = () => {
     setErrorMessage(null);
 
     setUploadedImageFile(file);
-    processImage(file);
   }, []);
 
   const downloadImage = (imageSrc: string, returnedImage?: boolean) => {
@@ -128,11 +138,13 @@ const FileUpload = () => {
     return <div style={spinnerStyle}></div>;
   };
 
-  const processImage = async (imageFile: File) => {
+    const processImage = async () => {
+      if (!uploadedImageFile) return;
+
     setIsLoading(true);
     try {
       const formData = new FormData();
-      formData.append("image_file", imageFile); // append the file directly, not as a binary string
+      formData.append("image_file", uploadedImageFile); // append the file directly, not as a binary string
       formData.append("embedding_file", "");
       formData.append("bounding_boxes", "");
 
@@ -251,6 +263,14 @@ const FileUpload = () => {
           >
             Clear
           </button>
+
+          <button
+              onClick={processImage}
+              className="bg-blue-500 p-2 px-5 rounded text-white hover:bg-blue-600 ml-4"
+              disabled={isLoading}
+            >
+              Process Image
+            </button>
         </div>
 
           
@@ -262,12 +282,25 @@ const FileUpload = () => {
           <p className="ml-5 text-lg font-semibold">{overlayImage ? 'Processed Image' : 'Input Image'}</p>
 
           <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto flex justify-center items-center">
-            {/* Update the source of the image based on the available image */}
-            <img
+          {overlayImage ? (
+                  <img
+                    src={overlayImage}
+                    alt="Processed"
+                    className="max-w-full max-h-full object-contain"
+                  />
+          ) : uploadedImageFile && (
+              <ImageCanvas
+                imageSrc={URL.createObjectURL(uploadedImageFile)}
+                onBoundingBoxesChange={handleBoundingBoxesChange}
+                />
+            )}
+            {/*<img
                   src={overlayImage ? overlayImage : uploadedImageFile ? URL.createObjectURL(uploadedImageFile) : ''}
                   alt={overlayImage ? 'Processed' : 'Uploaded'}
               className="max-w-full max-h-full object-contain"
-            />
+            />*/}
+
+
               <button
               onClick={() => {
                 // Check if overlayImage is available; otherwise, check if uploadedImageFile is not null before calling createObjectURL
