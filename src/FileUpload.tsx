@@ -189,9 +189,11 @@ const FileUpload = () => {
   const clearState = () => {
     setUploadedImageFile(null);
     setOverlayImage(null);
+    setOverlayMask(null); // Clear overlay mask if used
     setIsLoading(false);
     setErrorMessage(null);
   };
+
 
   return (
     <div>
@@ -241,44 +243,50 @@ const FileUpload = () => {
           <p className="text-lg font-semibold">Upload file</p>
         </label>
       </div>
+
       {(uploadedImageFile || overlayImage) && (
+        <>
         <div className="flex flex-row justify-center items-center">
           <button
-            onClick={() => {
-              clearState();
-            }}
+            onClick={clearState}
             className="bg-gray-100 p-2 px-5 rounded text-black hover:bg-gray-200 flex justify-center items-center"
           >
             Clear
           </button>
         </div>
-      )}
+
           
       <div className="flex flex-row justify-center items-center">
         <div className="flex flex-col pt-5">
           {renderSpinner()} {/* Render the spinner */}
 
+          {/* Update this condition to check both uploadedImageFile and overlayImage */}
           <p className="ml-5 text-lg font-semibold">{overlayImage ? 'Processed Image' : 'Input Image'}</p>
 
           <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto">
+            {/* Update the source of the image based on the available image */}
             <img
-              src={overlayImage ? overlayImage : uploadedImageFile ? URL.createObjectURL(uploadedImageFile) : ''}
-              alt={overlayImage ? 'Processed' : 'Uploaded'}
+                  src={overlayImage ? overlayImage : uploadedImageFile ? URL.createObjectURL(uploadedImageFile) : ''}
+                  alt={overlayImage ? 'Processed' : 'Uploaded'}
               className="max-w-full max-h-full object-contain"
             />
-            {uploadedImageFile && (
               <button
-                onClick={() =>
-                  downloadImage(URL.createObjectURL(uploadedImageFile))
+              onClick={() => {
+                // Check if overlayImage is available; otherwise, check if uploadedImageFile is not null before calling createObjectURL
+                const imageSrc = overlayImage ? overlayImage : uploadedImageFile ? URL.createObjectURL(uploadedImageFile) : null;
+                if (imageSrc) {
+                  downloadImage(imageSrc);
                 }
-                className="absolute top-2 right-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center"
-              >
-                <DownloadIcon className="h-5 w-5" />
-              </button>
-            )}
+              }}
+              className="absolute top-2 right-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center"
+            >
+              <DownloadIcon className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </div>
+      </>
+  )}
     </div>
   );
 };
