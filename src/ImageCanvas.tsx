@@ -6,10 +6,10 @@ interface ImageCanvasProps {
 }
 
 export interface BoundingBox {
-  startX: number;
-  startY: number;
-  endX: number;
-  endY: number;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
 }
 
 const ImageCanvas: React.FC<ImageCanvasProps> = ({ imageSrc, onBoundingBoxesChange }) => {
@@ -41,7 +41,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({ imageSrc, onBoundingBoxesChan
       context.beginPath();
       context.strokeStyle = 'red';
       context.lineWidth = 2;
-      context.rect(box.startX, box.startY, box.endX - box.startX, box.endY - box.startY);
+      context.rect(box.x1, box.y1, box.x2- box.x1, box.y2- box.y1);
       context.stroke();
     });
   };
@@ -69,10 +69,10 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({ imageSrc, onBoundingBoxesChan
 
     // Add new bounding box
     const newBox: BoundingBox = {
-      startX: startPoint.x,
-      startY: startPoint.y,
-      endX: endPoint.x,
-      endY: endPoint.y
+      x1: startPoint.x,
+      y1: startPoint.y,
+      x2: endPoint.x,
+      y2: endPoint.y
     };
     const updatedBoxes = [...boundingBoxes, newBox];
     setBoundingBoxes(updatedBoxes);
@@ -103,17 +103,42 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({ imageSrc, onBoundingBoxesChan
     }
   };
 
+  const clearBoundingBoxes = () => {
+    setBoundingBoxes([]);
+    onBoundingBoxesChange([]); // Notify parent component of the change
+    redrawCanvas(); // Redraw the canvas without the boxes
+  };
+
+  // Function to redraw the canvas
+  const redrawCanvas = () => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext('2d');
+    const image = imageRef.current;
+    
+    if (canvas && context && image) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0); // Redraw the image
+    }
+  };
 
 
   return (
-    <canvas
-      ref={canvasRef}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onMouseMove={handleMouseMove}
-      style={{ border: '1px solid black' }} // Optional: added for visibility
-    />
-  );
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}> {/* Flex container */}
+      <canvas
+        ref={canvasRef}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        style={{  marginBottom: '10px' }} // Canvas styling
+      />
+      <button 
+        onClick={clearBoundingBoxes}
+        className="bg-gray-100 p-2 px-5 rounded text-black hover:bg-gray-200 flex justify-center items-center"
+      >
+        Clear Bounding Boxes
+      </button>
+    </div>
+);
 };
 
 export default ImageCanvas;

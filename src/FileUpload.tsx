@@ -84,6 +84,8 @@ const FileUpload = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([]);
+  const [imageKey, setImageKey] = useState(Date.now()); // Add a key state for the image
+
 
 
   const handleBoundingBoxesChange = (boxes: BoundingBox[]) => {
@@ -117,7 +119,9 @@ const FileUpload = () => {
     setErrorMessage(null);
 
     setUploadedImageFile(file);
+    setImageKey(Date.now()); // Update the key to force re-render
   }, []);
+
 
   const downloadImage = (imageSrc: string, returnedImage?: boolean) => {
     const link = document.createElement("a");
@@ -146,7 +150,7 @@ const FileUpload = () => {
       const formData = new FormData();
       formData.append("image_file", uploadedImageFile); // append the file directly, not as a binary string
       formData.append("embedding_file", "");
-      formData.append("bounding_boxes", "");
+      formData.append("bounding_boxes", JSON.stringify(boundingBoxes));
 
       const response = await fetch(
         /*"https://fastapi-bgmt2kuix.brevlab.com/process_image/",*/
@@ -199,10 +203,14 @@ const FileUpload = () => {
   const clearState = () => {
     setUploadedImageFile(null);
     setOverlayImage(null);
-    setOverlayMask(null); // Clear overlay mask if used
+    setOverlayMask(null);
     setIsLoading(false);
     setErrorMessage(null);
+    setBoundingBoxes([]);
+    setImageKey(Date.now()); // Update the key to force re-render
   };
+
+  const clearBoundingBoxes = () => { setBoundingBoxes([]); };
 
 
   return (
@@ -264,6 +272,7 @@ const FileUpload = () => {
             Clear
           </button>
 
+
           <button
               onClick={processImage}
               className="bg-blue-500 p-2 px-5 rounded text-white hover:bg-blue-600 ml-4"
@@ -284,12 +293,14 @@ const FileUpload = () => {
           <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto flex justify-center items-center">
           {overlayImage ? (
                   <img
+                    key={imageKey}
                     src={overlayImage}
                     alt="Processed"
                     className="max-w-full max-h-full object-contain"
                   />
           ) : uploadedImageFile && (
               <ImageCanvas
+              key={imageKey}
                 imageSrc={URL.createObjectURL(uploadedImageFile)}
                 onBoundingBoxesChange={handleBoundingBoxesChange}
                 />
