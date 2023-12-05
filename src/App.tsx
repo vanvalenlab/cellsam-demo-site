@@ -3,6 +3,7 @@ import FileUpload from "./FileUpload";
 import Header from "./Header";
 import DownloadButton from "./Download";
 import Gallery from "./Gallery";
+import ImageUploader from "./ImageUploader";
 
 function App() {
   return (

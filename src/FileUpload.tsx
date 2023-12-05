@@ -11,7 +11,16 @@ interface IconProps {
   className?: string;
 }
 
-
+const spinnerStyle: React.CSSProperties = {
+  display: 'inline-block',
+  width: '20px',
+  height: '20px',
+  border: '3px solid rgba(195, 195, 195, 0.6)',
+  borderRadius: '50%',
+  borderTopColor: '#636767',
+  animation: 'spin 1s ease-in-out infinite',
+  margin: '10px auto',
+};
 
 const overlayStyle: CSSProperties = {
   position: 'absolute',
@@ -75,6 +84,9 @@ const FileUpload = () => {
   const [overlayMask, setOverlayMask] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+
+
 
   const handleDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -111,6 +123,11 @@ const FileUpload = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const renderSpinner = () => {
+    if (!isLoading) return null;
+    return <div style={spinnerStyle}></div>;
   };
 
   const processImage = async (imageFile: File) => {
@@ -236,24 +253,20 @@ const FileUpload = () => {
           </button>
         </div>
       )}
-            <div className="flex flex-row justify-center items-center">
-        {uploadedImageFile && (
-          <div className="flex flex-col pt-5">
-            <p className="ml-5 text-lg font-semibold">Image with Overlay</p>
+          
+      <div className="flex flex-row justify-center items-center">
+        <div className="flex flex-col pt-5">
+          {renderSpinner()} {/* Render the spinner */}
 
-            <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto">
-              <img
-                src={URL.createObjectURL(uploadedImageFile)}
-                alt="Uploaded"
-                className="max-w-full max-h-full object-contain"
-              />
-              {overlayImage && (
-                <img
-                  src={overlayImage}
-                  alt="Overlay"
-                  style={overlayStyle} // Use the overlayStyle defined earlier
-                />
-              )}
+          <p className="ml-5 text-lg font-semibold">{overlayImage ? 'Processed Image' : 'Input Image'}</p>
+
+          <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto">
+            <img
+              src={overlayImage ? overlayImage : uploadedImageFile ? URL.createObjectURL(uploadedImageFile) : ''}
+              alt={overlayImage ? 'Processed' : 'Uploaded'}
+              className="max-w-full max-h-full object-contain"
+            />
+            {uploadedImageFile && (
               <button
                 onClick={() =>
                   downloadImage(URL.createObjectURL(uploadedImageFile))
@@ -262,14 +275,13 @@ const FileUpload = () => {
               >
                 <DownloadIcon className="h-5 w-5" />
               </button>
-            </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
 };
-
 
 
 export default FileUpload;
