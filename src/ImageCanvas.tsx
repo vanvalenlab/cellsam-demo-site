@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useState, MouseEvent } from 'react';
 
+
+
 interface ImageCanvasProps {
     imageSrc: string;
     boundingBoxes: BoundingBox[]; // Added this line
@@ -15,6 +17,8 @@ export interface BoundingBox {
 }
 
 const ImageCanvas: React.FC<ImageCanvasProps> = ({ imageSrc, boundingBoxes, onBoundingBoxesChange }) => {
+    const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
+
 const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef(new Image());
   const [isDrawing, setIsDrawing] = useState(false);
@@ -37,12 +41,12 @@ const canvasRef = useRef<HTMLCanvasElement>(null);
     image.src = imageSrc;
   }, [imageSrc]);
 
-    const drawBoxes = (context: CanvasRenderingContext2D, boxes: BoundingBox[]) => {
-    boxes.forEach(box => {
+  const drawBoxes = (context: CanvasRenderingContext2D, boxes: BoundingBox[]) => {
+    boxes.forEach((box, index) => {
       context.beginPath();
-      context.strokeStyle = 'red';
+      context.strokeStyle = index === selectedBoxIndex ? 'blue' : 'red'; // Highlight selected box
       context.lineWidth = 2;
-      context.rect(box.x1, box.y1, box.x2- box.x1, box.y2- box.y1);
+      context.rect(box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1);
       context.stroke();
     });
   };
@@ -58,7 +62,7 @@ const canvasRef = useRef<HTMLCanvasElement>(null);
     }
   };
 
-  const handleMouseUp = (e: MouseEvent) => {
+  const handleMouseUp = (e: MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawing || !canvasRef.current) return;
     setIsDrawing(false);
     
@@ -76,8 +80,36 @@ const canvasRef = useRef<HTMLCanvasElement>(null);
       y2: endPoint.y
     };
     onBoundingBoxesChange([...boundingBoxes, newBox]); // Update parent component directly
-  };
 
+    const clickedBoxIndex = boundingBoxes.findIndex(box => 
+        startPoint.x >= box.x1 && startPoint.x <= box.x2 &&
+        startPoint.y >= box.y1 && startPoint.y <= box.y2
+      );
+  
+      if (clickedBoxIndex !== -1) {
+        setSelectedBoxIndex(clickedBoxIndex); // Select the box
+      } else {
+        setSelectedBoxIndex(null); // No box is selected
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+        if ((event.key === 'Delete' || event.key === 'Backspace') && selectedBoxIndex !== null) {
+          const newBoxes = boundingBoxes.filter((_, index) => index !== selectedBoxIndex);
+          onBoundingBoxesChange(newBoxes);
+          setSelectedBoxIndex(null);
+        }
+      };
+    
+      useEffect(() => {
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            // Remove the event listener
+            window.removeEventListener('keydown', handleKeyDown);
+          };
+        }, [selectedBoxIndex, boundingBoxes, onBoundingBoxesChange]);
+      
+ 
   
   const handleMouseMove = (e: MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawing || !canvasRef.current) return;
@@ -102,6 +134,8 @@ const canvasRef = useRef<HTMLCanvasElement>(null);
     }
   };
 
+  
+
 
   // Function to redraw the canvas
   const redrawCanvas = () => {
@@ -117,16 +151,16 @@ const canvasRef = useRef<HTMLCanvasElement>(null);
 
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}> {/* Flex container */}
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <canvas
         ref={canvasRef}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
-        style={{  marginBottom: '10px' }} // Canvas styling
+        style={{ marginBottom: '10px' }}
       />
     </div>
-);
+  );
 };
 
 export default ImageCanvas;

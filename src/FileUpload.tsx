@@ -1,4 +1,4 @@
-import React, { CSSProperties, DragEvent, ChangeEvent, useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect, useRef, CSSProperties, DragEvent, ChangeEvent } from "react";
 import JSZip from "jszip";
 import Notification from "./Notification";
 import ImageCanvas, { BoundingBox } from './ImageCanvas'; // Import ImageCanvas and BoundingBox type
@@ -83,10 +83,8 @@ const FileUpload = () => {
   const [overlayMask, setOverlayMask] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null); // Specify the type here
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([]);
-  const [imageKey, setImageKey] = useState(Date.now()); // Add a key state for the image
-
-
 
   const handleBoundingBoxesChange = (boxes: BoundingBox[]) => {
     setBoundingBoxes(boxes);
@@ -123,7 +121,6 @@ const FileUpload = () => {
     }
 
     setUploadedImageFile(file);
-    setImageKey(prevKey => prevKey + 1); // Update the key to force re-render
   }, [uploadedImageFile]);
 
 
@@ -254,8 +251,12 @@ const FileUpload = () => {
     setOverlayMask(null);
     setIsLoading(false);
     setErrorMessage(null);
+
+    // Reset the file input
     setBoundingBoxes([]);
-    setImageKey(Date.now()); // Update the key to force re-render
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const clearBoundingBoxes = () => { setBoundingBoxes([]); };
@@ -298,6 +299,7 @@ const FileUpload = () => {
           multiple
           accept="image/*"
           className="hidden"
+          ref={fileInputRef} // Add this line
           onChange={(e) => {
             if (e.target.files) {
               handleFiles(e.target.files);
@@ -349,7 +351,6 @@ const FileUpload = () => {
           <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto flex justify-center items-center">
           {overlayImage ? (
                   <img
-                    key={imageKey}
                     src={overlayImage}
                     alt="Processed"
                     className="max-w-full max-h-full object-contain"
