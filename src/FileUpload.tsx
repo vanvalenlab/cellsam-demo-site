@@ -118,9 +118,13 @@ const FileUpload = () => {
     setIsLoading(false);
     setErrorMessage(null);
 
+    if (uploadedImageFile) {
+      URL.revokeObjectURL(URL.createObjectURL(uploadedImageFile));
+    }
+
     setUploadedImageFile(file);
-    setImageKey(Date.now()); // Update the key to force re-render
-  }, []);
+    setImageKey(prevKey => prevKey + 1); // Update the key to force re-render
+  }, [uploadedImageFile]);
 
 
   const downloadImage = (imageSrc: string, returnedImage?: boolean) => {
@@ -300,7 +304,6 @@ const FileUpload = () => {
                   />
           ) : uploadedImageFile && (
               <ImageCanvas
-              key={imageKey}
                 imageSrc={URL.createObjectURL(uploadedImageFile)}
                 onBoundingBoxesChange={handleBoundingBoxesChange}
                 />
