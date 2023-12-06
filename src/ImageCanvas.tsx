@@ -18,6 +18,9 @@ export interface BoundingBox {
 
 const ImageCanvas: React.FC<ImageCanvasProps> = ({ imageSrc, boundingBoxes, onBoundingBoxesChange }) => {
     const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
+    const clickTolerance = 10;
+    let isBoxSelection = false; // Flag to indicate if the current action is box selection
+
 
 const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef(new Image());
@@ -51,47 +54,54 @@ const canvasRef = useRef<HTMLCanvasElement>(null);
     });
   };
 
-  const handleMouseDown = (e: MouseEvent) => {
+
+  const handleMouseDown = (e: MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
     if (rect) {
-      setStartPoint({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      });
-      setIsDrawing(true);
-    }
-  };
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
 
-  const handleMouseUp = (e: MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !canvasRef.current) return;
-    setIsDrawing(false);
-    
-    const rect = canvasRef.current.getBoundingClientRect();
-    const endPoint = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    };
-
-    // Add new bounding box
-    const newBox: BoundingBox = {
-      x1: startPoint.x,
-      y1: startPoint.y,
-      x2: endPoint.x,
-      y2: endPoint.y
-    };
-    onBoundingBoxesChange([...boundingBoxes, newBox]); // Update parent component directly
-
-    const clickedBoxIndex = boundingBoxes.findIndex(box => 
-        startPoint.x >= box.x1 && startPoint.x <= box.x2 &&
-        startPoint.y >= box.y1 && startPoint.y <= box.y2
+      // Check if a box is clicked
+      const clickedBoxIndex = boundingBoxes.findIndex(box => 
+        clickX >= box.x1 - clickTolerance && clickX <= box.x2 + clickTolerance &&
+        clickY >= box.y1 - clickTolerance && clickY <= box.y2 + clickTolerance
       );
-  
+
       if (clickedBoxIndex !== -1) {
         setSelectedBoxIndex(clickedBoxIndex); // Select the box
+        isBoxSelection = true; // Set flag to indicate box selection
       } else {
-        setSelectedBoxIndex(null); // No box is selected
+        setStartPoint({ x: clickX, y: clickY });
+        setIsDrawing(true);
+        isBoxSelection = false; // Not selecting a box, but drawing a new one
       }
-    };
+    }
+  };
+  const handleMouseUp = (e: MouseEvent<HTMLCanvasElement>) => {
+    if (!canvasRef.current) return;
+
+    if (isDrawing && !isBoxSelection) {
+      setIsDrawing(false);
+      const rect = canvasRef.current.getBoundingClientRect();
+      const endPoint = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+
+      // Add new bounding box
+      const newBox: BoundingBox = {
+        x1: startPoint.x,
+        y1: startPoint.y,
+        x2: endPoint.x,
+        y2: endPoint.y
+      };
+      onBoundingBoxesChange([...boundingBoxes, newBox]); // Update parent component directly
+    }
+    // Reset the flag
+    isBoxSelection = false;
+  };
+
+
 
     const handleKeyDown = (event: KeyboardEvent) => {
         if ((event.key === 'Delete' || event.key === 'Backspace') && selectedBoxIndex !== null) {
