@@ -1,9 +1,11 @@
 import React, { useRef, useEffect, useState, MouseEvent } from 'react';
 
 interface ImageCanvasProps {
-  imageSrc: string;
-  onBoundingBoxesChange: (boxes: BoundingBox[]) => void;
-}
+    imageSrc: string;
+    boundingBoxes: BoundingBox[]; // Added this line
+    onBoundingBoxesChange: (boxes: BoundingBox[]) => void;
+  }
+  
 
 export interface BoundingBox {
   x1: number;
@@ -12,10 +14,9 @@ export interface BoundingBox {
   y2: number;
 }
 
-const ImageCanvas: React.FC<ImageCanvasProps> = ({ imageSrc, onBoundingBoxesChange }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const ImageCanvas: React.FC<ImageCanvasProps> = ({ imageSrc, boundingBoxes, onBoundingBoxesChange }) => {
+const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef(new Image());
-  const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
 
@@ -34,9 +35,9 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({ imageSrc, onBoundingBoxesChan
     };
 
     image.src = imageSrc;
-  }, [imageSrc, boundingBoxes]);
+  }, [imageSrc]);
 
-  const drawBoxes = (context: CanvasRenderingContext2D, boxes: BoundingBox[]) => {
+    const drawBoxes = (context: CanvasRenderingContext2D, boxes: BoundingBox[]) => {
     boxes.forEach(box => {
       context.beginPath();
       context.strokeStyle = 'red';
@@ -74,9 +75,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({ imageSrc, onBoundingBoxesChan
       x2: endPoint.x,
       y2: endPoint.y
     };
-    const updatedBoxes = [...boundingBoxes, newBox];
-    setBoundingBoxes(updatedBoxes);
-    onBoundingBoxesChange(updatedBoxes); // Notify parent component
+    onBoundingBoxesChange([...boundingBoxes, newBox]); // Update parent component directly
   };
 
   
@@ -103,11 +102,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({ imageSrc, onBoundingBoxesChan
     }
   };
 
-  const clearBoundingBoxes = () => {
-    setBoundingBoxes([]);
-    onBoundingBoxesChange([]); // Notify parent component of the change
-    redrawCanvas(); // Redraw the canvas without the boxes
-  };
 
   // Function to redraw the canvas
   const redrawCanvas = () => {
@@ -131,12 +125,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({ imageSrc, onBoundingBoxesChan
         onMouseMove={handleMouseMove}
         style={{  marginBottom: '10px' }} // Canvas styling
       />
-      <button 
-        onClick={clearBoundingBoxes}
-        className="bg-gray-100 p-2 px-5 rounded text-black hover:bg-gray-200 flex justify-center items-center"
-      >
-        Clear Bounding Boxes
-      </button>
     </div>
 );
 };

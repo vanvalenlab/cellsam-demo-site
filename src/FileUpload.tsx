@@ -146,6 +146,50 @@ const FileUpload = () => {
     return <div style={spinnerStyle}></div>;
   };
 
+  const embedImage = async () => {
+    if (!uploadedImageFile) return;
+
+  setIsLoading(true);
+  try {
+    const formData = new FormData();
+    formData.append("image_file", uploadedImageFile); // append the file directly, not as a binary string
+
+    const response = await fetch(
+      /*"https://fastapi-bgmt2kuix.brevlab.com/process_image/",*/
+      "http://131.215.2.187:8000/embed_image/",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (response.ok) {
+      console.log(response);
+      const blob = await response.blob();
+      JSZip.loadAsync(blob).then((zip) => {
+          const bboxFile = zip.file("bounding_boxes.json");
+          if (bboxFile) {
+            bboxFile.async("string").then((bboxString) => {
+              const bboxJson = JSON.parse(bboxString);
+              console.log(boundingBoxes);
+              setBoundingBoxes(bboxJson);
+            });
+          }
+      });
+      setErrorMessage(null);
+    } else {
+      const errorText = await response.text();
+      console.error("Error processing image:", errorText);
+      setErrorMessage(errorText);
+    }
+  } catch (error) {
+    console.error("Error processing image:", error);
+    setErrorMessage(`Error processing image: ${error}`);
+  }
+  setIsLoading(false);
+};
+
+
     const processImage = async () => {
       if (!uploadedImageFile) return;
 
@@ -276,6 +320,14 @@ const FileUpload = () => {
             Clear
           </button>
 
+          <button
+  onClick={embedImage}
+  className="bg-green-500 p-2 px-5 rounded text-white hover:bg-green-600 ml-4"
+  disabled={isLoading}
+>
+  Fetch and Process Zip
+</button>
+
 
           <button
               onClick={processImage}
@@ -304,6 +356,7 @@ const FileUpload = () => {
                   />
           ) : uploadedImageFile && (
               <ImageCanvas
+              boundingBoxes={boundingBoxes}
                 imageSrc={URL.createObjectURL(uploadedImageFile)}
                 onBoundingBoxesChange={handleBoundingBoxesChange}
                 />
@@ -334,7 +387,7 @@ const FileUpload = () => {
   )}
     </div>
   );
-};
+            };
 
 
 export default FileUpload;
