@@ -1,11 +1,17 @@
-import React, { useCallback, useState, useEffect, useRef, CSSProperties, DragEvent, ChangeEvent } from "react";
+import React, {
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+  CSSProperties,
+  DragEvent,
+  ChangeEvent,
+} from "react";
 import JSZip from "jszip";
 import Notification from "./Notification";
-import ImageCanvas, { BoundingBox } from './ImageCanvas'; // Import ImageCanvas and BoundingBox type
+import ImageCanvas, { BoundingBox } from "./ImageCanvas"; // Import ImageCanvas and BoundingBox type
 
 // ... other necessary imports ...
-
-
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
@@ -20,17 +26,15 @@ interface IconProps {
 }
 
 const spinnerStyle: React.CSSProperties = {
-  display: 'inline-block',
-  width: '20px',
-  height: '20px',
-  border: '3px solid rgba(195, 195, 195, 0.6)',
-  borderRadius: '50%',
-  borderTopColor: '#636767',
-  animation: 'spin 1s ease-in-out infinite',
-  margin: '10px auto',
+  display: "inline-block",
+  width: "20px",
+  height: "20px",
+  border: "3px solid rgba(195, 195, 195, 0.6)",
+  borderRadius: "50%",
+  borderTopColor: "#636767",
+  animation: "spin 1s ease-in-out infinite",
+  margin: "10px auto",
 };
-
-
 
 const DownloadIcon: React.FC<IconProps> = (props) => {
   return (
@@ -50,8 +54,6 @@ const DownloadIcon: React.FC<IconProps> = (props) => {
     </svg>
   );
 };
-
-
 
 const Spinner = () => (
   <svg
@@ -107,22 +109,22 @@ const FileUpload = () => {
     handleFiles(files);
   }, []);
 
+  const handleFiles = useCallback(
+    (files: FileList) => {
+      const file = files[0];
+      setOverlayImage(null);
+      setOverlayMask(null);
+      setIsLoading(false);
+      setErrorMessage(null);
 
+      if (uploadedImageFile) {
+        URL.revokeObjectURL(URL.createObjectURL(uploadedImageFile));
+      }
 
-  const handleFiles = useCallback((files: FileList) => {
-    const file = files[0];
-    setOverlayImage(null);
-    setOverlayMask(null);
-    setIsLoading(false);
-    setErrorMessage(null);
-
-    if (uploadedImageFile) {
-      URL.revokeObjectURL(URL.createObjectURL(uploadedImageFile));
-    }
-
-    setUploadedImageFile(file);
-  }, [uploadedImageFile]);
-
+      setUploadedImageFile(file);
+    },
+    [uploadedImageFile]
+  );
 
   const downloadImage = (imageSrc: string, returnedImage?: boolean) => {
     const link = document.createElement("a");
@@ -146,24 +148,24 @@ const FileUpload = () => {
   const embedImage = async () => {
     if (!uploadedImageFile) return;
 
-  setIsLoading(true);
-  try {
-    const formData = new FormData();
-    formData.append("image_file", uploadedImageFile); // append the file directly, not as a binary string
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("image_file", uploadedImageFile); // append the file directly, not as a binary string
 
-    const response = await fetch(
-      /*"https://fastapi-bgmt2kuix.brevlab.com/process_image/",*/
-      "http://131.215.2.187:8000/embed_image/",
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
+      const response = await fetch(
+        /*"https://fastapi-bgmt2kuix.brevlab.com/process_image/",*/
+        "http://131.215.2.187:8000/embed_image/",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
-    if (response.ok) {
-      console.log(response);
-      const blob = await response.blob();
-      JSZip.loadAsync(blob).then((zip) => {
+      if (response.ok) {
+        console.log(response);
+        const blob = await response.blob();
+        JSZip.loadAsync(blob).then((zip) => {
           const bboxFile = zip.file("bounding_boxes.json");
           if (bboxFile) {
             bboxFile.async("string").then((bboxString) => {
@@ -172,23 +174,22 @@ const FileUpload = () => {
               setBoundingBoxes(bboxJson);
             });
           }
-      });
-      setErrorMessage(null);
-    } else {
-      const errorText = await response.text();
-      console.error("Error processing image:", errorText);
-      setErrorMessage(errorText);
+        });
+        setErrorMessage(null);
+      } else {
+        const errorText = await response.text();
+        console.error("Error processing image:", errorText);
+        setErrorMessage(errorText);
+      }
+    } catch (error) {
+      console.error("Error processing image:", error);
+      setErrorMessage(`Error processing image: ${error}`);
     }
-  } catch (error) {
-    console.error("Error processing image:", error);
-    setErrorMessage(`Error processing image: ${error}`);
-  }
-  setIsLoading(false);
-};
+    setIsLoading(false);
+  };
 
-
-    const processImage = async () => {
-      if (!uploadedImageFile) return;
+  const processImage = async () => {
+    if (!uploadedImageFile) return;
 
     setIsLoading(true);
     try {
@@ -259,8 +260,9 @@ const FileUpload = () => {
     }
   };
 
-  const clearBoundingBoxes = () => { setBoundingBoxes([]); };
-
+  const clearBoundingBoxes = () => {
+    setBoundingBoxes([]);
+  };
 
   return (
     <div>
@@ -314,81 +316,83 @@ const FileUpload = () => {
 
       {(uploadedImageFile || overlayImage) && (
         <>
-        <div className="flex flex-row justify-center items-center">
-          <button
-            onClick={clearState}
-            className="bg-gray-100 p-2 px-5 rounded text-black hover:bg-gray-200 flex justify-center items-center"
-          >
-            Clear
-          </button>
+          <div className="flex flex-row justify-center items-center">
+            <button
+              onClick={clearState}
+              className="bg-gray-100 p-2 px-5 rounded text-black hover:bg-gray-200 flex justify-center items-center"
+            >
+              Clear
+            </button>
 
-          <button
-  onClick={embedImage}
-  className="bg-green-500 p-2 px-5 rounded text-white hover:bg-green-600 ml-4"
-  disabled={isLoading}
->
-  Fetch and Process Zip
-</button>
+            <button
+              onClick={embedImage}
+              className="bg-green-500 p-2 px-5 rounded text-white hover:bg-green-600 ml-4"
+              disabled={isLoading}
+            >
+              Fetch and Process Zip
+            </button>
 
-
-          <button
+            <button
               onClick={processImage}
               className="bg-blue-500 p-2 px-5 rounded text-white hover:bg-blue-600 ml-4"
               disabled={isLoading}
             >
               Process Image
             </button>
-        </div>
+          </div>
 
-          
-      <div className="flex flex-row justify-center items-center">
-        <div className="flex flex-col pt-5">
-          {renderSpinner()} {/* Render the spinner */}
-
-          {/* Update this condition to check both uploadedImageFile and overlayImage */}
-          <p className="ml-5 text-lg font-semibold">{overlayImage ? 'Processed Image' : 'Input Image'}</p>
-
-          <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto flex justify-center items-center">
-          {overlayImage ? (
+          <div className="flex flex-row justify-center items-center">
+            <div className="flex flex-col pt-5">
+              {renderSpinner()} {/* Render the spinner */}
+              {/* Update this condition to check both uploadedImageFile and overlayImage */}
+              <p className="ml-5 text-lg font-semibold">
+                {overlayImage ? "Processed Image" : "Input Image"}
+              </p>
+              <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto flex justify-center items-center">
+                {overlayImage ? (
                   <img
                     src={overlayImage}
                     alt="Processed"
                     className="max-w-full max-h-full object-contain"
                   />
-          ) : uploadedImageFile && (
-              <ImageCanvas
-              boundingBoxes={boundingBoxes}
-                imageSrc={URL.createObjectURL(uploadedImageFile)}
-                onBoundingBoxesChange={handleBoundingBoxesChange}
-                />
-            )}
-            {/*<img
+                ) : (
+                  uploadedImageFile && (
+                    <ImageCanvas
+                      boundingBoxes={boundingBoxes}
+                      imageSrc={URL.createObjectURL(uploadedImageFile)}
+                      onBoundingBoxesChange={handleBoundingBoxesChange}
+                    />
+                  )
+                )}
+                {/*<img
                   src={overlayImage ? overlayImage : uploadedImageFile ? URL.createObjectURL(uploadedImageFile) : ''}
                   alt={overlayImage ? 'Processed' : 'Uploaded'}
               className="max-w-full max-h-full object-contain"
             />*/}
 
-
-              <button
-              onClick={() => {
-                // Check if overlayImage is available; otherwise, check if uploadedImageFile is not null before calling createObjectURL
-                const imageSrc = overlayImage ? overlayImage : uploadedImageFile ? URL.createObjectURL(uploadedImageFile) : null;
-                if (imageSrc) {
-                  downloadImage(imageSrc);
-                }
-              }}
-              className="absolute top-2 right-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center"
-            >
-              <DownloadIcon className="h-5 w-5" />
-            </button>
+                <button
+                  onClick={() => {
+                    // Check if overlayImage is available; otherwise, check if uploadedImageFile is not null before calling createObjectURL
+                    const imageSrc = overlayImage
+                      ? overlayImage
+                      : uploadedImageFile
+                      ? URL.createObjectURL(uploadedImageFile)
+                      : null;
+                    if (imageSrc) {
+                      downloadImage(imageSrc);
+                    }
+                  }}
+                  className="absolute top-2 right-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center"
+                >
+                  <DownloadIcon className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      </>
-  )}
+        </>
+      )}
     </div>
   );
-            };
-
+};
 
 export default FileUpload;
