@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import JSZip from "jszip";
 import Notification from "./Notification";
 import { error } from "console";
@@ -60,6 +60,7 @@ const FileUpload = () => {
   const [overlayMask, setOverlayMask] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null); // Specify the type here
 
   const handleDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -158,6 +159,11 @@ const FileUpload = () => {
     setOverlayImage(null);
     setIsLoading(false);
     setErrorMessage(null);
+
+    // Reset the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   return (
@@ -197,6 +203,7 @@ const FileUpload = () => {
           multiple
           accept="image/*"
           className="hidden"
+          ref={fileInputRef} // Add this line
           onChange={(e) => {
             if (e.target.files) {
               handleFiles(e.target.files);
