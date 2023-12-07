@@ -23,7 +23,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   showBoundingBoxes,
 }) => {
   const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
-
+  const [hoveredBoxIndex, setHoveredBoxIndex] = useState<number | null>(null);
   const [lastTempRect, setLastTempRect] = useState<BoundingBox | null>(null);
   const clickTolerance = 10;
   let isBoxSelection = false; // Flag to indicate if the current action is box selection
@@ -31,7 +31,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef(new Image());
   const maskImageRef = useRef(new Image());
-
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
 
@@ -89,18 +88,38 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       drawImage(); // Redraw the image to clear previous box drawings
 
       boundingBoxes.forEach((box, index) => {
-        context.strokeStyle = index === selectedBoxIndex ? "red" : "white";
+        // Set the style for the hovered box
+        if (index === hoveredBoxIndex) {
+          context.strokeStyle = "lightcoral"; // Color for hovered box
+          context.shadowColor = "red";
+          context.shadowBlur = 10;
+        }
+        // Set the style for the selected box
+        else if (index === selectedBoxIndex) {
+          context.strokeStyle = "red"; // Color for selected box
+          context.shadowColor = "transparent";
+          context.shadowBlur = 0;
+        }
+        // Style for non-hovered, non-selected boxes
+        else {
+          context.strokeStyle = "white";
+          context.shadowColor = "transparent";
+          context.shadowBlur = 0;
+        }
+
         context.lineWidth = 2;
         context.beginPath();
         context.rect(box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1);
         context.stroke();
+
+        // Reset shadowBlur for the next box
+        context.shadowBlur = 0;
       });
     }
   };
-
   useEffect(() => {
     drawBoxes();
-  }, [boundingBoxes, selectedBoxIndex]);
+  }, [boundingBoxes, selectedBoxIndex, hoveredBoxIndex]);
 
   const handleMouseDown = (e: MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -193,7 +212,10 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
-    if (selectedBoxIndex !== null && (event.key === "Delete" || event.key === "Backspace")) {
+    if (
+      selectedBoxIndex !== null &&
+      (event.key === "Delete" || event.key === "Backspace")
+    ) {
       const deletedBox = boundingBoxes[selectedBoxIndex];
       const newBoxes = boundingBoxes.filter(
         (_, index) => index !== selectedBoxIndex
@@ -202,10 +224,10 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       setSelectedBoxIndex(null); // Reset selectedBoxIndex after deletion
       redrawDeletedBoxArea(deletedBox); // Redraw only the deleted box area
     } else if (event.key === "Escape") {
-        // Logic to exit the bounding box drawing process
-        setIsDrawing(false);
-        setLastTempRect(null);
-        setSelectedBoxIndex(null);
+      // Logic to exit the bounding box drawing process
+      setIsDrawing(false);
+      setLastTempRect(null);
+      setSelectedBoxIndex(null);
     }
   };
 
@@ -215,9 +237,24 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [selectedBoxIndex, handleKeyDown]);
-  
 
   const handleMouseMove = (e: MouseEvent<HTMLCanvasElement>) => {
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const hoveredIndex = boundingBoxes.findIndex(
+      (box) =>
+        mouseX >= box.x1 &&
+        mouseX <= box.x2 &&
+        mouseY >= box.y1 &&
+        mouseY <= box.y2
+    );
+
+    setHoveredBoxIndex(hoveredIndex !== -1 ? hoveredIndex : null);
+
     if (isDrawing && canvasRef.current) {
       const rect = canvasRef.current.getBoundingClientRect();
       const currentPoint = {

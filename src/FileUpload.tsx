@@ -264,15 +264,13 @@ const FileUpload = () => {
       setOverlayImage(null);
       setOverlayMask(null);
       setSegmentationMask(null);
-  
+
       // Reset the file input
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     }
   };
-  
-  
 
   const clearBoundingBoxes = () => {
     setBoundingBoxes([]);
