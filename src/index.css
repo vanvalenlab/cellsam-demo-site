@@ -105,3 +105,52 @@ code {
   color: #2196F3; /* Lighter blue for hover effect, adjust as needed */
 }
 
+.button-base {
+  padding: 8px 20px; /* Consistent padding */
+  border-radius: 4px; /* Rounded corners */
+  text-align: center;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px; /* Space between buttons */
+  transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+/* General hover effect for all buttons */
+.button-base:hover {
+  opacity: 0.9;
+}
+
+/* Style for the toggle button */
+.toggle-button {
+  background-color: #f0ad4e; /* Bootstrap's 'warning' color */
+  color: white;
+}
+
+/* Style for the 'Clear' button */
+.clear-button {
+  background-color: #dcdcdc; /* Light gray */
+  color: black;
+}
+
+/* Style for the 'Find boxes' button */
+.find-boxes-button {
+  background-color: #5cb85c; /* Bootstrap's 'success' color */
+  color: white;
+}
+
+/* Style for the 'Process Image' button */
+.process-image-button {
+  background-color: #0275d8; /* Bootstrap's 'primary' color */
+  color: white;
+}
+
+/* Additional style for disabled buttons */
+.button-base:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+

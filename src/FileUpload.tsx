@@ -88,7 +88,14 @@ const FileUpload = () => {
   const fileInputRef = useRef<HTMLInputElement>(null); // Specify the type here
   const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([]);
   const [segmentationMask, setSegmentationMask] = useState<string | null>(null);
+  // In FileUpload component
+  const [showBoundingBoxes, setShowBoundingBoxes] = useState(true);
 
+  // Checkbox change handler
+
+  const handleCheckboxChange = () => {
+    setShowBoundingBoxes(!showBoundingBoxes);
+  };
 
   const handleBoundingBoxesChange = (boxes: BoundingBox[]) => {
     setBoundingBoxes(boxes);
@@ -213,13 +220,13 @@ const FileUpload = () => {
         console.log(response);
         const blob = await response.blob();
         JSZip.loadAsync(blob).then((zip) => {
-          const maskFile = zip.file('segmentation_mask.png');
+          const maskFile = zip.file("segmentation_mask.png");
           Object.keys(zip.files).forEach((filename) => {
             if (maskFile) {
               maskFile.async("blob").then((maskBlob) => {
                 const maskUrl = URL.createObjectURL(maskBlob);
-                setSegmentationMask(maskUrl); 
-            });
+                setSegmentationMask(maskUrl);
+              });
             } else if (filename.endsWith("mask.npy")) {
               const file = zip.file(filename);
               if (file) {
@@ -318,23 +325,27 @@ const FileUpload = () => {
         <>
           <div className="flex flex-row justify-center items-center">
             <button
-              onClick={clearState}
-              className="bg-gray-100 p-2 px-5 rounded text-black hover:bg-gray-200 flex justify-center items-center"
+              onClick={handleCheckboxChange}
+              className="button-base toggle-button"
             >
+              {showBoundingBoxes ? "Hide Boxes" : "Show Boxes"}
+            </button>
+
+            <button onClick={clearState} className="button-base clear-button">
               Clear
             </button>
 
             <button
               onClick={embedImage}
-              className="bg-green-500 p-2 px-5 rounded text-white hover:bg-green-600 ml-4"
+              className="button-base find-boxes-button"
               disabled={isLoading}
             >
-              Fetch and Process Zip
+              Find boxes
             </button>
 
             <button
               onClick={processImage}
-              className="bg-blue-500 p-2 px-5 rounded text-white hover:bg-blue-600 ml-4"
+              className="button-base process-image-button"
               disabled={isLoading}
             >
               Process Image
@@ -349,36 +360,15 @@ const FileUpload = () => {
                 {overlayImage ? "Processed Image" : "Input Image"}
               </p>
               <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto flex justify-center items-center">
-  {uploadedImageFile && (
-    <ImageCanvas
-      boundingBoxes={boundingBoxes}
-      imageSrc={URL.createObjectURL(uploadedImageFile)}
-      onBoundingBoxesChange={handleBoundingBoxesChange}
-      segmentationMaskSrc={segmentationMask} // Pass the segmentation mask URL
-    />
-  )}
-  {/* {segmentationMask && (
-    <img
-      src={segmentationMask}
-      alt="Segmentation Mask"
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%', // Set the width to match the ImageCanvas width
-        height: '100%', // Set the height to match the ImageCanvas height
-        objectFit: 'contain' // Maintain the aspect ratio
-      }}
-    />
-  )} */}
-
-
-
-                {/*<img
-                  src={overlayImage ? overlayImage : uploadedImageFile ? URL.createObjectURL(uploadedImageFile) : ''}
-                  alt={overlayImage ? 'Processed' : 'Uploaded'}
-              className="max-w-full max-h-full object-contain"
-            />*/}
+                {uploadedImageFile && (
+                  <ImageCanvas
+                    boundingBoxes={boundingBoxes}
+                    imageSrc={URL.createObjectURL(uploadedImageFile)}
+                    onBoundingBoxesChange={handleBoundingBoxesChange}
+                    segmentationMaskSrc={segmentationMask} // Pass the segmentation mask URL
+                    showBoundingBoxes={showBoundingBoxes} // Pass this prop to ImageCanvas
+                  />
+                )}
 
                 <button
                   onClick={() => {

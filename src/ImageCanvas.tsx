@@ -1,12 +1,12 @@
 import React, { useRef, useEffect, useState, MouseEvent } from "react";
 
 interface ImageCanvasProps {
-    imageSrc: string;
-    boundingBoxes: BoundingBox[];
-    onBoundingBoxesChange: (boxes: BoundingBox[]) => void;
-    segmentationMaskSrc?: string | null; // optional prop for segmentation mask URL
-  }
-  
+  imageSrc: string;
+  boundingBoxes: BoundingBox[];
+  onBoundingBoxesChange: (boxes: BoundingBox[]) => void;
+  segmentationMaskSrc?: string | null; // optional prop for segmentation mask URL
+  showBoundingBoxes?: boolean;
+}
 
 export interface BoundingBox {
   x1: number;
@@ -20,9 +20,10 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   boundingBoxes,
   onBoundingBoxesChange,
   segmentationMaskSrc, // Add this line
+  showBoundingBoxes,
+
 }) => {
   const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
-  
 
   const clickTolerance = 10;
   let isBoxSelection = false; // Flag to indicate if the current action is box selection
@@ -46,14 +47,13 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 
   const drawMask = () => {
     const canvas = canvasRef.current;
-    const context = canvas?.getContext('2d');
+    const context = canvas?.getContext("2d");
     const maskImage = maskImageRef.current;
-  
+
     if (canvas && context && maskImage.complete && maskImage.src) {
       context.drawImage(maskImage, 0, 0, canvas.width, canvas.height);
     }
   };
-  
 
   useEffect(() => {
     const image = imageRef.current;
@@ -80,6 +80,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   };
 
   const drawBoxes = () => {
+    if (!showBoundingBoxes) return; // Don't draw boxes if showBoundingBoxes is false
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
 
