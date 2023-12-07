@@ -21,7 +21,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   onBoundingBoxesChange,
   segmentationMaskSrc, // Add this line
   showBoundingBoxes,
-
 }) => {
   const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
 
@@ -85,6 +84,9 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     const context = canvas?.getContext("2d");
 
     if (canvas && context) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      drawImage(); // Redraw the image to clear previous box drawings
+
       boundingBoxes.forEach((box, index) => {
         context.strokeStyle = index === selectedBoxIndex ? "red" : "white";
         context.lineWidth = 2;

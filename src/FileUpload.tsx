@@ -90,6 +90,7 @@ const FileUpload = () => {
   const [segmentationMask, setSegmentationMask] = useState<string | null>(null);
   // In FileUpload component
   const [showBoundingBoxes, setShowBoundingBoxes] = useState(true);
+  const [canvasCleared, setCanvasCleared] = useState(false);
 
   // Checkbox change handler
 
@@ -253,17 +254,21 @@ const FileUpload = () => {
 
   // Clear function
   const clearState = () => {
-    setUploadedImageFile(null);
-    setOverlayImage(null);
-    setOverlayMask(null);
-    setIsLoading(false);
-    setErrorMessage(null);
-    setSegmentationMask(null);
+    if (!canvasCleared) {
+      // Clear the bounding boxes (which effectively clears the canvas)
+      setBoundingBoxes([]);
+      setCanvasCleared(true);
+    } else {
+      // If the canvas is already clear, then clear the image
+      setUploadedImageFile(null);
+      setOverlayImage(null);
+      setOverlayMask(null);
+      setCanvasCleared(false); // Reset the canvasCleared state
 
-    // Reset the file input
-    setBoundingBoxes([]);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      // Reset the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
