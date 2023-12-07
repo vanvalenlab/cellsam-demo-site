@@ -136,6 +136,8 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
           clickY <= box.y2 + clickTolerance
       );
 
+      if (isDrawing) return;
+
       if (clickedBoxIndex !== -1) {
         setSelectedBoxIndex(clickedBoxIndex); // Select the box
         isBoxSelection = true; // Set flag to indicate box selection
@@ -146,15 +148,34 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       }
     }
   };
-
   const handleMouseUp = (e: MouseEvent<HTMLCanvasElement>) => {
     if (!canvasRef.current) return;
-
+  
     const rect = canvasRef.current.getBoundingClientRect();
     const mouseUpX = e.clientX - rect.left;
     const mouseUpY = e.clientY - rect.top;
-
-    // Check if the mouse up event is near an existing bounding box
+  
+    // If currently drawing a new box, finalize it
+    if (isDrawing) {
+      // Create the new box
+      const newBox: BoundingBox = {
+        x1: Math.min(startPoint.x, mouseUpX),
+        y1: Math.min(startPoint.y, mouseUpY),
+        x2: Math.max(startPoint.x, mouseUpX),
+        y2: Math.max(startPoint.y, mouseUpY),
+      };
+  
+      // Update the boundingBoxes state with the new box
+      onBoundingBoxesChange([...boundingBoxes, newBox]);
+  
+      // Clear the temporary rectangle and exit the drawing mode
+      setLastTempRect(null);
+      setIsDrawing(false);
+  
+      return; // Exit the function early to prevent selecting another box
+    }
+  
+    // If not drawing, proceed with selecting or deselecting a box
     const clickedBoxIndex = boundingBoxes.findIndex(
       (box) =>
         mouseUpX >= box.x1 - clickTolerance &&
@@ -162,30 +183,19 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
         mouseUpY >= box.y1 - clickTolerance &&
         mouseUpY <= box.y2 + clickTolerance
     );
-
+  
     if (clickedBoxIndex !== -1) {
-      // Click is near an existing box, select this box
+      // If click is near an existing box, select this box
       setSelectedBoxIndex(clickedBoxIndex);
-    } else if (isDrawing) {
-      // Click is not near an existing box and is drawing, create a new box
-      setIsDrawing(false);
-
-      const newBox: BoundingBox = {
-        x1: Math.min(startPoint.x, mouseUpX),
-        y1: Math.min(startPoint.y, mouseUpY),
-        x2: Math.max(startPoint.x, mouseUpX),
-        y2: Math.max(startPoint.y, mouseUpY),
-      };
-
-      onBoundingBoxesChange([...boundingBoxes, newBox]);
-      setSelectedBoxIndex(boundingBoxes.length); // Select the newly created box
     } else {
-      // Click is not near any box and not drawing, deselect any selected box
+      // If click is not near any box, deselect any selected box
       setSelectedBoxIndex(null);
     }
-
-    setLastTempRect(null); // Clear the last temporary rectangle
+  
+    // Clear the temporary rectangle
+    setLastTempRect(null);
   };
+  
 
   const redrawDeletedBoxArea = (deletedBox: BoundingBox) => {
     const canvas = canvasRef.current;
