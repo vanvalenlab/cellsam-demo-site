@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState, MouseEvent } from "react";
 
 interface ImageCanvasProps {
   imageSrc: string;
-  boundingBoxes: BoundingBox[]; // Added this line
+  boundingBoxes: BoundingBox[];
   onBoundingBoxesChange: (boxes: BoundingBox[]) => void;
 }
 
@@ -29,34 +29,44 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
+    const image = imageRef.current;
+    image.onload = () => {
+      drawImage();
+      drawBoxes(); // Draw the initial boxes
+    };
+    image.src = imageSrc;
+  }, [imageSrc]);
+
+  const drawImage = () => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
     const image = imageRef.current;
 
-    image.onload = () => {
-      if (canvas && context) {
-        canvas.width = image.width;
-        canvas.height = image.height;
-        context.drawImage(image, 0, 0);
-        drawBoxes(context, boundingBoxes); // Draw the initial boxes
-      }
-    };
-
-    image.src = imageSrc;
-  }, [imageSrc, boundingBoxes]); // Add selectedBoxIndex to the dependency array
-
-  const drawBoxes = (
-    context: CanvasRenderingContext2D,
-    boxes: BoundingBox[]
-  ) => {
-    boxes.forEach((box, index) => {
-      context.beginPath();
-      context.strokeStyle = index === selectedBoxIndex ? "blue" : "red"; // Highlight the selected box in blue
-      context.lineWidth = 2;
-      context.rect(box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1);
-      context.stroke();
-    });
+    if (canvas && context && image.complete) {
+      canvas.width = image.width;
+      canvas.height = image.height;
+      context.drawImage(image, 0, 0);
+    }
   };
+
+  const drawBoxes = () => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+
+    if (canvas && context) {
+      boundingBoxes.forEach((box, index) => {
+        context.strokeStyle = index === selectedBoxIndex ? "blue" : "red";
+        context.lineWidth = 2;
+        context.beginPath();
+        context.rect(box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1);
+        context.stroke();
+      });
+    }
+  };
+
+  useEffect(() => {
+    drawBoxes();
+  }, [boundingBoxes, selectedBoxIndex]);
 
   const handleMouseDown = (e: MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -83,28 +93,69 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       }
     }
   };
+
   const handleMouseUp = (e: MouseEvent<HTMLCanvasElement>) => {
     if (!canvasRef.current) return;
 
-    if (isDrawing && !isBoxSelection) {
+    const rect = canvasRef.current.getBoundingClientRect();
+    const mouseUpX = e.clientX - rect.left;
+    const mouseUpY = e.clientY - rect.top;
+
+    // Check if the mouse up event is near an existing bounding box
+    const clickedBoxIndex = boundingBoxes.findIndex(
+      (box) =>
+        mouseUpX >= box.x1 - clickTolerance &&
+        mouseUpX <= box.x2 + clickTolerance &&
+        mouseUpY >= box.y1 - clickTolerance &&
+        mouseUpY <= box.y2 + clickTolerance
+    );
+
+    if (clickedBoxIndex !== -1) {
+      // Click is near an existing box, select this box
+      setSelectedBoxIndex(clickedBoxIndex);
+    } else if (isDrawing) {
+      // Click is not near an existing box and is drawing, create a new box
       setIsDrawing(false);
-      const rect = canvasRef.current.getBoundingClientRect();
-      const endPoint = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
+
+      const newBox: BoundingBox = {
+        x1: Math.min(startPoint.x, mouseUpX),
+        y1: Math.min(startPoint.y, mouseUpY),
+        x2: Math.max(startPoint.x, mouseUpX),
+        y2: Math.max(startPoint.y, mouseUpY),
       };
 
-      // Add new bounding box
-      const newBox: BoundingBox = {
-        x1: startPoint.x,
-        y1: startPoint.y,
-        x2: endPoint.x,
-        y2: endPoint.y,
-      };
-      onBoundingBoxesChange([...boundingBoxes, newBox]); // Update parent component directly
+      onBoundingBoxesChange([...boundingBoxes, newBox]);
+      setSelectedBoxIndex(boundingBoxes.length); // Select the newly created box
+    } else {
+      // Click is not near any box and not drawing, deselect any selected box
+      setSelectedBoxIndex(null);
     }
-    // Reset the flag
-    isBoxSelection = false;
+
+    setLastTempRect(null); // Clear the last temporary rectangle
+  };
+
+  const redrawDeletedBoxArea = (deletedBox: BoundingBox) => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+    if (!canvas || !context) return;
+
+    const { x1, y1, x2, y2 } = deletedBox;
+    const width = x2 - x1;
+    const height = y2 - y1;
+
+    context.clearRect(x1, y1, width, height);
+    context.drawImage(
+      imageRef.current,
+      x1,
+      y1,
+      width,
+      height,
+      x1,
+      y1,
+      width,
+      height
+    );
+    drawBoxes(); // Redraw remaining boxes
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -112,11 +163,13 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       (event.key === "Delete" || event.key === "Backspace") &&
       selectedBoxIndex !== null
     ) {
+      const deletedBox = boundingBoxes[selectedBoxIndex];
       const newBoxes = boundingBoxes.filter(
         (_, index) => index !== selectedBoxIndex
       );
       onBoundingBoxesChange(newBoxes);
-      setSelectedBoxIndex(null);
+      setSelectedBoxIndex(null); // Reset selectedBoxIndex after deletion
+      redrawDeletedBoxArea(deletedBox); // Redraw only the deleted box area
     }
   };
 
@@ -127,51 +180,94 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [selectedBoxIndex, boundingBoxes, onBoundingBoxesChange]);
+  const [lastTempRect, setLastTempRect] = useState<BoundingBox | null>(null);
 
   const handleMouseMove = (e: MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !canvasRef.current) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const currentPoint = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
+    if (isDrawing && canvasRef.current) {
+      const rect = canvasRef.current.getBoundingClientRect();
+      const currentPoint = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
 
-    const context = canvasRef.current.getContext("2d");
-    if (context) {
-      context.clearRect(
-        0,
-        0,
-        canvasRef.current.width,
-        canvasRef.current.height
-      );
-      context.drawImage(imageRef.current, 0, 0); // Use imageRef.current here
-      drawBoxes(context, boundingBoxes); // Redraw existing boxes
+      // Clear the last temporary rectangle
+      if (lastTempRect) {
+        redrawCanvasArea(
+          { x: lastTempRect.x1, y: lastTempRect.y1 },
+          { x: lastTempRect.x2, y: lastTempRect.y2 }
+        );
+      }
 
-      // Draw the current box
-      context.beginPath();
-      context.strokeStyle = "red";
-      context.lineWidth = 2;
-      context.rect(
-        startPoint.x,
-        startPoint.y,
-        currentPoint.x - startPoint.x,
-        currentPoint.y - startPoint.y
-      );
-      context.stroke();
+      // Set the new temporary rectangle
+      setLastTempRect({
+        x1: startPoint.x,
+        y1: startPoint.y,
+        x2: currentPoint.x,
+        y2: currentPoint.y,
+      });
+
+      // Draw the new temporary rectangle
+      const context = canvasRef.current.getContext("2d");
+      if (context) {
+        context.strokeStyle = "red";
+        context.lineWidth = 2;
+        context.beginPath();
+        context.rect(
+          startPoint.x,
+          startPoint.y,
+          currentPoint.x - startPoint.x,
+          currentPoint.y - startPoint.y
+        );
+        context.stroke();
+      }
     }
+  };
+
+  interface Point {
+    x: number;
+    y: number;
+  }
+
+  const redrawCanvasArea = (startPoint: Point, currentPoint: Point) => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+    if (!canvas || !context) return;
+
+    // Calculate the area to be cleared and redrawn
+    const minX = Math.min(startPoint.x, currentPoint.x);
+    const minY = Math.min(startPoint.y, currentPoint.y);
+    const width = Math.abs(currentPoint.x - startPoint.x);
+    const height = Math.abs(currentPoint.y - startPoint.y);
+
+    // Clear and redraw only the necessary area
+    context.clearRect(minX, minY, width, height);
+    context.drawImage(
+      imageRef.current,
+      minX,
+      minY,
+      width,
+      height,
+      minX,
+      minY,
+      width,
+      height
+    );
+    drawBoxes(); // Redraw boxes that intersect with the area
   };
 
   // Function to redraw the canvas
   const redrawCanvas = () => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
-    const image = imageRef.current;
-
-    if (canvas && context && image) {
+    if (canvas && context) {
       context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(image, 0, 0); // Redraw the image
+      context.drawImage(imageRef.current, 0, 0);
+      drawBoxes();
     }
   };
+  useEffect(() => {
+    redrawCanvas();
+  }, [boundingBoxes, selectedBoxIndex]);
 
   return (
     <div
