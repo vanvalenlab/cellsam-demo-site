@@ -254,23 +254,25 @@ const FileUpload = () => {
 
   // Clear function
   const clearState = () => {
-    if (!canvasCleared) {
-      // Clear the bounding boxes (which effectively clears the canvas)
+    if (boundingBoxes.length > 0 || segmentationMask) {
+      // If there are bounding boxes or a segmentation mask, clear only those
       setBoundingBoxes([]);
-      setCanvasCleared(true);
+      setSegmentationMask(null);
     } else {
-      // If the canvas is already clear, then clear the image
+      // If there are no bounding boxes or masks, clear the image
       setUploadedImageFile(null);
       setOverlayImage(null);
       setOverlayMask(null);
-      setCanvasCleared(false); // Reset the canvasCleared state
-
+      setSegmentationMask(null);
+  
       // Reset the file input
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     }
   };
+  
+  
 
   const clearBoundingBoxes = () => {
     setBoundingBoxes([]);
