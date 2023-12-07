@@ -1,10 +1,12 @@
 import React, { useRef, useEffect, useState, MouseEvent } from "react";
 
 interface ImageCanvasProps {
-  imageSrc: string;
-  boundingBoxes: BoundingBox[];
-  onBoundingBoxesChange: (boxes: BoundingBox[]) => void;
-}
+    imageSrc: string;
+    boundingBoxes: BoundingBox[];
+    onBoundingBoxesChange: (boxes: BoundingBox[]) => void;
+    segmentationMaskSrc?: string | null; // optional prop for segmentation mask URL
+  }
+  
 
 export interface BoundingBox {
   x1: number;
@@ -17,25 +19,53 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   imageSrc,
   boundingBoxes,
   onBoundingBoxesChange,
+  segmentationMaskSrc, // Add this line
 }) => {
   const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
+  
 
   const clickTolerance = 10;
   let isBoxSelection = false; // Flag to indicate if the current action is box selection
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef(new Image());
+  const maskImageRef = useRef(new Image());
+
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    if (segmentationMaskSrc) {
+      const maskImage = maskImageRef.current;
+      maskImage.onload = () => {
+        drawMask();
+      };
+      maskImage.src = segmentationMaskSrc;
+    }
+  }, [segmentationMaskSrc]);
+
+  const drawMask = () => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext('2d');
+    const maskImage = maskImageRef.current;
+  
+    if (canvas && context && maskImage.complete && maskImage.src) {
+      context.drawImage(maskImage, 0, 0, canvas.width, canvas.height);
+    }
+  };
+  
 
   useEffect(() => {
     const image = imageRef.current;
     image.onload = () => {
       drawImage();
-      drawBoxes(); // Draw the initial boxes
+      drawBoxes();
+      if (segmentationMaskSrc) {
+        drawMask(); // Draw the mask if it exists
+      }
     };
     image.src = imageSrc;
-  }, [imageSrc]);
+  }, [imageSrc, segmentationMaskSrc]); // Add segmentationMaskSrc as a dependency
 
   const drawImage = () => {
     const canvas = canvasRef.current;
@@ -55,7 +85,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 
     if (canvas && context) {
       boundingBoxes.forEach((box, index) => {
-        context.strokeStyle = index === selectedBoxIndex ? "blue" : "red";
+        context.strokeStyle = index === selectedBoxIndex ? "red" : "white";
         context.lineWidth = 2;
         context.beginPath();
         context.rect(box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1);
