@@ -24,6 +24,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 }) => {
   const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
 
+  const [lastTempRect, setLastTempRect] = useState<BoundingBox | null>(null);
   const clickTolerance = 10;
   let isBoxSelection = false; // Flag to indicate if the current action is box selection
 
@@ -192,10 +193,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
-    if (
-      (event.key === "Delete" || event.key === "Backspace") &&
-      selectedBoxIndex !== null
-    ) {
+    if (selectedBoxIndex !== null && (event.key === "Delete" || event.key === "Backspace")) {
       const deletedBox = boundingBoxes[selectedBoxIndex];
       const newBoxes = boundingBoxes.filter(
         (_, index) => index !== selectedBoxIndex
@@ -203,17 +201,21 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       onBoundingBoxesChange(newBoxes);
       setSelectedBoxIndex(null); // Reset selectedBoxIndex after deletion
       redrawDeletedBoxArea(deletedBox); // Redraw only the deleted box area
+    } else if (event.key === "Escape") {
+        // Logic to exit the bounding box drawing process
+        setIsDrawing(false);
+        setLastTempRect(null);
+        setSelectedBoxIndex(null);
     }
   };
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => {
-      // Remove the event listener
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedBoxIndex, boundingBoxes, onBoundingBoxesChange]);
-  const [lastTempRect, setLastTempRect] = useState<BoundingBox | null>(null);
+  }, [selectedBoxIndex, handleKeyDown]);
+  
 
   const handleMouseMove = (e: MouseEvent<HTMLCanvasElement>) => {
     if (isDrawing && canvasRef.current) {
