@@ -25,7 +25,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
   const [hoveredBoxIndex, setHoveredBoxIndex] = useState<number | null>(null);
   const [lastTempRect, setLastTempRect] = useState<BoundingBox | null>(null);
-  const clickTolerance = 10;
+  const clickTolerance = 3;
   let isBoxSelection = false; // Flag to indicate if the current action is box selection
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -35,14 +35,27 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
+    const image = imageRef.current;
+    image.onload = () => {
+      const canvas = canvasRef.current;
+      const context = canvas?.getContext("2d");
+  
+      if (canvas && context && image.complete) {
+        canvas.width = image.width;
+        canvas.height = image.height;
+        context.drawImage(image, 0, 0);
+        drawBoxes();
+      }
+    };
+    image.src = imageSrc;
+  
     if (segmentationMaskSrc) {
       const maskImage = maskImageRef.current;
-      maskImage.onload = () => {
-        drawMask();
-      };
+      maskImage.onload = drawMask;
       maskImage.src = segmentationMaskSrc;
     }
-  }, [segmentationMaskSrc]);
+  }, [imageSrc, segmentationMaskSrc]);
+  
 
   const drawMask = () => {
     const canvas = canvasRef.current;
@@ -53,18 +66,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       context.drawImage(maskImage, 0, 0, canvas.width, canvas.height);
     }
   };
-
-  useEffect(() => {
-    const image = imageRef.current;
-    image.onload = () => {
-      drawImage();
-      drawBoxes();
-      if (segmentationMaskSrc) {
-        drawMask(); // Draw the mask if it exists
-      }
-    };
-    image.src = imageSrc;
-  }, [imageSrc, segmentationMaskSrc]); // Add segmentationMaskSrc as a dependency
 
   const drawImage = () => {
     const canvas = canvasRef.current;
@@ -79,13 +80,22 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   };
 
   const drawBoxes = () => {
-    if (!showBoundingBoxes) return; // Don't draw boxes if showBoundingBoxes is false
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
 
     if (canvas && context) {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      drawImage(); // Redraw the image to clear previous box drawings
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        drawImage(); // Redraw the image to clear previous box drawings
+
+        // Draw the segmentation mask
+        if (segmentationMaskSrc) {
+            const maskImage = maskImageRef.current;
+            if (maskImage.complete && maskImage.src) {
+                context.drawImage(maskImage, 0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        if (!showBoundingBoxes) return; // Don't draw boxes if showBoundingBoxes is false
 
       boundingBoxes.forEach((box, index) => {
         // Set the style for the hovered box
