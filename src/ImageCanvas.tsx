@@ -25,7 +25,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
   const [hoveredBoxIndex, setHoveredBoxIndex] = useState<number | null>(null);
   const [lastTempRect, setLastTempRect] = useState<BoundingBox | null>(null);
-  const clickTolerance = 3;
+  const clickTolerance = 1;
   let isBoxSelection = false; // Flag to indicate if the current action is box selection
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -133,31 +133,38 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 
   const handleMouseDown = (e: MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
-    if (rect) {
-      const clickX = e.clientX - rect.left;
-      const clickY = e.clientY - rect.top;
-
-      // Check if a box is clicked
-      const clickedBoxIndex = boundingBoxes.findIndex(
-        (box) =>
-          clickX >= box.x1 - clickTolerance &&
-          clickX <= box.x2 + clickTolerance &&
-          clickY >= box.y1 - clickTolerance &&
-          clickY <= box.y2 + clickTolerance
-      );
-
-      if (isDrawing) return;
-
+    if (!rect) return;
+  
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+  
+    // Check if a box is clicked
+    const clickedBoxIndex = boundingBoxes.findIndex(
+      (box) =>
+        clickX >= box.x1 - clickTolerance &&
+        clickX <= box.x2 + clickTolerance &&
+        clickY >= box.y1 - clickTolerance &&
+        clickY <= box.y2 + clickTolerance
+    );
+  
+    if (e.shiftKey) {
+      // If Shift key is pressed and a box is clicked, select the box
       if (clickedBoxIndex !== -1) {
-        setSelectedBoxIndex(clickedBoxIndex); // Select the box
-        isBoxSelection = true; // Set flag to indicate box selection
+        setSelectedBoxIndex(clickedBoxIndex);
+        isBoxSelection = true;
       } else {
-        setStartPoint({ x: clickX, y: clickY });
-        setIsDrawing(true);
-        isBoxSelection = false; // Not selecting a box, but drawing a new one
+        setIsDrawing(false);
+        setSelectedBoxIndex(null);
       }
+    } else {
+      // If Shift key is not pressed, start drawing a new box or deselect existing box
+      setStartPoint({ x: clickX, y: clickY });
+      setIsDrawing(true);
+      setSelectedBoxIndex(null);
+      isBoxSelection = false;
     }
   };
+  
   const handleMouseUp = (e: MouseEvent<HTMLCanvasElement>) => {
     if (!canvasRef.current) return;
   
