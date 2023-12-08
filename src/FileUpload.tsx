@@ -387,7 +387,7 @@ const FileUpload = () => {
                       downloadImage(imageSrc);
                     }
                   }}
-                  className="absolute top-2 right-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center"
+                  className="absolute top-2 right-2 left-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center"
                 >
                   <DownloadIcon className="h-5 w-5" />
                 </button>

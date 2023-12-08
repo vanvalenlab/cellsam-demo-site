@@ -40,7 +40,26 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
 
+  // Hook for drawing image
+  // This is a astupid solution that works very well. To avoid he flashing
+  // when things re render, I just draw the image twice. This shouldn't be 
+  // necessary, but I don't notice a latency issue, so I'll leave as is. 
+  // If someone wants to refactor this, basically think about having 3
+  // canvas instead of 4. Image, box, mask.
   useEffect(() => {
+    drawImage();
+  }, [imageSrc]);
+
+  // Hook for drawing the segmentation mask
+  useEffect(() => {
+   drawMasks(); 
+  }, [segmentationMaskSrc]);
+
+  useEffect(() => {
+    drawBoxes();
+  }, [boundingBoxes, selectedBoxIndex, hoveredBoxIndex]);
+
+  const drawImage = () => {
     const image = imageRef.current;
     image.onload = () => {
       const canvas = canvasRef.current;
@@ -74,9 +93,9 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       }
     };
     image.src = imageSrc;
-  }, [imageSrc]);
+  };
 
-  useEffect(() => {
+  const drawMasks = () => {
     const image = maskImageRef.current;
     const canvas = maskCanvasRef.current;
     const context = canvas?.getContext("2d");
@@ -96,32 +115,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       context.clearRect(0, 0, canvas.width, canvas.height);
       }
     }
-  }, [segmentationMaskSrc]);
-
-  const drawMask = () => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    const maskImage = maskImageRef.current;
-
-    if (canvas && context && maskImage.complete && maskImage.src) {
-      context.drawImage(maskImage, 0, 0, canvas.width, canvas.height);
-    }
   };
-
-  // const drawBoxes = () => {
-  //   const canvas = boxCanvasRef.current;
-  //   const context = canvas?.getContext('2d');
-  //   if (canvas && context) {
-  //     context.clearRect(0, 0, canvas.width, canvas.height);
-  //     boundingBoxes.forEach(box => {
-  //       context.beginPath();
-  //       context.strokeStyle = 'red';
-  //       context.lineWidth = 2;
-  //       context.rect(box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1);
-  //       context.stroke();
-  //     });
-  //   }
-  // };
 
   const drawBoxes = () => {
     const canvas = boxCanvasRef.current;
@@ -129,17 +123,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 
     if (canvas && context) {
       context.clearRect(0, 0, canvas.width, canvas.height);
-      // drawImage(); // Redraw the image to clear previous box drawings
 
-      // // Draw the segmentation mask
-      if (segmentationMaskSrc) {
-        const maskImage = maskImageRef.current;
-        if (maskImage.complete && maskImage.src) {
-          context.drawImage(maskImage, 0, 0, canvas.width, canvas.height);
-        }
-      }
-
-      // if (!showBoundingBoxes) return; // Don't draw boxes if showBoundingBoxes is false
 
       boundingBoxes.forEach((box, index) => {
         // Set the style for the hovered box
@@ -171,10 +155,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       });
     }
   };
-
-  useEffect(() => {
-    drawBoxes();
-  }, [boundingBoxes, selectedBoxIndex, hoveredBoxIndex]);
 
   const handleMouseDown = (e: MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -226,13 +206,10 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
         x2: Math.max(startPoint.x, mouseUpX),
         y2: Math.max(startPoint.y, mouseUpY),
       };
-
       // Update the boundingBoxes state with the new box
       onBoundingBoxesChange([...boundingBoxes, newBox]);
-
       // Clear the temporary rectangle and exit the drawing mode
       setIsDrawing(false);
-
       return; // Exit the function early to prevent selecting another box
     }
 
@@ -337,46 +314,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     y: number;
   }
 
-  const redrawCanvasArea = (startPoint: Point, currentPoint: Point) => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return;
-
-    // Calculate the area to be cleared and redrawn
-    const minX = Math.min(startPoint.x, currentPoint.x);
-    const minY = Math.min(startPoint.y, currentPoint.y);
-    const width = Math.abs(currentPoint.x - startPoint.x);
-    const height = Math.abs(currentPoint.y - startPoint.y);
-
-    // Clear and redraw only the necessary area
-    context.clearRect(minX, minY, width, height);
-    context.drawImage(
-      imageRef.current,
-      minX,
-      minY,
-      width,
-      height,
-      minX,
-      minY,
-      width,
-      height
-    );
-    drawBoxes(); // Redraw boxes that intersect with the area
-  };
-
-  // return (
-  //   <div
-  //     style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-  //   >
-  //     <canvas
-  //       ref={canvasRef}
-  //       onMouseDown={handleMouseDown}
-  //       onMouseUp={handleMouseUp}
-  //       onMouseMove={handleMouseMove}
-  //       style={{ marginBottom: "10px" }}
-  //     />
-  //   </div>
-  // );
 
   return (
     <div
