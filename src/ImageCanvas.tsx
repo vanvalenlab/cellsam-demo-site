@@ -24,7 +24,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 }) => {
   const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
   const [hoveredBoxIndex, setHoveredBoxIndex] = useState<number | null>(null);
-  const [lastTempRect, setLastTempRect] = useState<BoundingBox | null>(null);
   const clickTolerance = 1;
   let isBoxSelection = false; // Flag to indicate if the current action is box selection
 
@@ -69,6 +68,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 
         context.drawImage(image, 0, 0);
         underContext.drawImage(image, 0, 0);
+        // I don't like that we have to do this but it works
         drawBoxes();
         setImageSize({ width: image.width, height: image.height });
       }
@@ -78,19 +78,23 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 
   useEffect(() => {
     const image = maskImageRef.current;
-    image.onload = () => {
-      const canvas = maskCanvasRef.current;
-      const context = canvas?.getContext("2d");
+    const canvas = maskCanvasRef.current;
+    const context = canvas?.getContext("2d");
 
+    image.onload = () => {
       if (canvas && context && image.complete) {
         canvas.width = image.width;
         canvas.height = image.height;
 
-        context.drawImage(image, 0, 0);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
       }
     };
     if (segmentationMaskSrc) {
       image.src = segmentationMaskSrc;
+    } else {
+      if (canvas && context) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      }
     }
   }, [segmentationMaskSrc]);
 
@@ -227,7 +231,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       onBoundingBoxesChange([...boundingBoxes, newBox]);
 
       // Clear the temporary rectangle and exit the drawing mode
-      setLastTempRect(null);
       setIsDrawing(false);
 
       return; // Exit the function early to prevent selecting another box
@@ -251,7 +254,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     }
 
     // Clear the temporary rectangle
-    setLastTempRect(null);
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -268,7 +270,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     } else if (event.key === "Escape") {
       // Logic to exit the bounding box drawing process
       setIsDrawing(false);
-      setLastTempRect(null);
       setSelectedBoxIndex(null);
     }
   };
