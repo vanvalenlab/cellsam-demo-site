@@ -34,6 +34,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
 
+
   useEffect(() => {
     const image = imageRef.current;
     image.onload = () => {
@@ -127,6 +128,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       });
     }
   };
+
   useEffect(() => {
     drawBoxes();
   }, [boundingBoxes, selectedBoxIndex, hoveredBoxIndex]);
@@ -214,29 +216,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   };
   
 
-  const redrawDeletedBoxArea = (deletedBox: BoundingBox) => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return;
-
-    const { x1, y1, x2, y2 } = deletedBox;
-    const width = x2 - x1;
-    const height = y2 - y1;
-
-    context.clearRect(x1, y1, width, height);
-    context.drawImage(
-      imageRef.current,
-      x1,
-      y1,
-      width,
-      height,
-      x1,
-      y1,
-      width,
-      height
-    );
-    drawBoxes(); // Redraw remaining boxes
-  };
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (
@@ -249,7 +228,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       );
       onBoundingBoxesChange(newBoxes);
       setSelectedBoxIndex(null); // Reset selectedBoxIndex after deletion
-      redrawDeletedBoxArea(deletedBox); // Redraw only the deleted box area
     } else if (event.key === "Escape") {
       // Logic to exit the bounding box drawing process
       setIsDrawing(false);
@@ -354,19 +332,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     drawBoxes(); // Redraw boxes that intersect with the area
   };
 
-  // Function to redraw the canvas
-  const redrawCanvas = () => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (canvas && context) {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(imageRef.current, 0, 0);
-      drawBoxes();
-    }
-  };
-  useEffect(() => {
-    redrawCanvas();
-  }, [boundingBoxes, selectedBoxIndex]);
+
 
   return (
     <div
