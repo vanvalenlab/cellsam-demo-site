@@ -28,35 +28,71 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   const clickTolerance = 1;
   let isBoxSelection = false; // Flag to indicate if the current action is box selection
 
+  // A stupid solution but I think it could work?
+  const underCanvasRef = useRef<HTMLCanvasElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const boxCanvasRef = useRef<HTMLCanvasElement>(null);
+  const maskCanvasRef = useRef<HTMLCanvasElement>(null);
+
   const imageRef = useRef(new Image());
   const maskImageRef = useRef(new Image());
+
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
-
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     const image = imageRef.current;
     image.onload = () => {
       const canvas = canvasRef.current;
+      const underCanvas = underCanvasRef.current;
+      const boxCanvas = boxCanvasRef.current;
       const context = canvas?.getContext("2d");
-  
-      if (canvas && context && image.complete) {
+      const underContext = underCanvas?.getContext("2d");
+
+      if (
+        canvas &&
+        context &&
+        underCanvas &&
+        underContext &&
+        boxCanvas &&
+        image.complete
+      ) {
         canvas.width = image.width;
         canvas.height = image.height;
+
+        underCanvas.width = image.width;
+        underCanvas.height = image.height;
+
+        boxCanvas.width = image.width;
+        boxCanvas.height = image.height;
+
         context.drawImage(image, 0, 0);
+        underContext.drawImage(image, 0, 0);
         drawBoxes();
+        setImageSize({ width: image.width, height: image.height });
       }
     };
     image.src = imageSrc;
-  
+  }, [imageSrc]);
+
+  useEffect(() => {
+    const image = maskImageRef.current;
+    image.onload = () => {
+      const canvas = maskCanvasRef.current;
+      const context = canvas?.getContext("2d");
+
+      if (canvas && context && image.complete) {
+        canvas.width = image.width;
+        canvas.height = image.height;
+
+        context.drawImage(image, 0, 0);
+      }
+    };
     if (segmentationMaskSrc) {
-      const maskImage = maskImageRef.current;
-      maskImage.onload = drawMask;
-      maskImage.src = segmentationMaskSrc;
+      image.src = segmentationMaskSrc;
     }
-  }, [imageSrc, segmentationMaskSrc]);
-  
+  }, [segmentationMaskSrc]);
 
   const drawMask = () => {
     const canvas = canvasRef.current;
@@ -68,35 +104,38 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     }
   };
 
-  const drawImage = () => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    const image = imageRef.current;
-
-    if (canvas && context && image.complete) {
-      canvas.width = image.width;
-      canvas.height = image.height;
-      context.drawImage(image, 0, 0);
-    }
-  };
+  // const drawBoxes = () => {
+  //   const canvas = boxCanvasRef.current;
+  //   const context = canvas?.getContext('2d');
+  //   if (canvas && context) {
+  //     context.clearRect(0, 0, canvas.width, canvas.height);
+  //     boundingBoxes.forEach(box => {
+  //       context.beginPath();
+  //       context.strokeStyle = 'red';
+  //       context.lineWidth = 2;
+  //       context.rect(box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1);
+  //       context.stroke();
+  //     });
+  //   }
+  // };
 
   const drawBoxes = () => {
-    const canvas = canvasRef.current;
+    const canvas = boxCanvasRef.current;
     const context = canvas?.getContext("2d");
 
     if (canvas && context) {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        drawImage(); // Redraw the image to clear previous box drawings
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      // drawImage(); // Redraw the image to clear previous box drawings
 
-        // Draw the segmentation mask
-        if (segmentationMaskSrc) {
-            const maskImage = maskImageRef.current;
-            if (maskImage.complete && maskImage.src) {
-                context.drawImage(maskImage, 0, 0, canvas.width, canvas.height);
-            }
+      // // Draw the segmentation mask
+      if (segmentationMaskSrc) {
+        const maskImage = maskImageRef.current;
+        if (maskImage.complete && maskImage.src) {
+          context.drawImage(maskImage, 0, 0, canvas.width, canvas.height);
         }
+      }
 
-        if (!showBoundingBoxes) return; // Don't draw boxes if showBoundingBoxes is false
+      // if (!showBoundingBoxes) return; // Don't draw boxes if showBoundingBoxes is false
 
       boundingBoxes.forEach((box, index) => {
         // Set the style for the hovered box
@@ -136,10 +175,10 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   const handleMouseDown = (e: MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
-  
+
     const clickX = e.clientX - rect.left;
     const clickY = e.clientY - rect.top;
-  
+
     // Check if a box is clicked
     const clickedBoxIndex = boundingBoxes.findIndex(
       (box) =>
@@ -148,7 +187,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
         clickY >= box.y1 - clickTolerance &&
         clickY <= box.y2 + clickTolerance
     );
-  
+
     if (e.shiftKey) {
       // If Shift key is pressed and a box is clicked, select the box
       if (clickedBoxIndex !== -1) {
@@ -166,14 +205,14 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       isBoxSelection = false;
     }
   };
-  
+
   const handleMouseUp = (e: MouseEvent<HTMLCanvasElement>) => {
     if (!canvasRef.current) return;
-  
+
     const rect = canvasRef.current.getBoundingClientRect();
     const mouseUpX = e.clientX - rect.left;
     const mouseUpY = e.clientY - rect.top;
-  
+
     // If currently drawing a new box, finalize it
     if (isDrawing) {
       // Create the new box
@@ -183,17 +222,17 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
         x2: Math.max(startPoint.x, mouseUpX),
         y2: Math.max(startPoint.y, mouseUpY),
       };
-  
+
       // Update the boundingBoxes state with the new box
       onBoundingBoxesChange([...boundingBoxes, newBox]);
-  
+
       // Clear the temporary rectangle and exit the drawing mode
       setLastTempRect(null);
       setIsDrawing(false);
-  
+
       return; // Exit the function early to prevent selecting another box
     }
-  
+
     // If not drawing, proceed with selecting or deselecting a box
     const clickedBoxIndex = boundingBoxes.findIndex(
       (box) =>
@@ -202,7 +241,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
         mouseUpY >= box.y1 - clickTolerance &&
         mouseUpY <= box.y2 + clickTolerance
     );
-  
+
     if (clickedBoxIndex !== -1) {
       // If click is near an existing box, select this box
       setSelectedBoxIndex(clickedBoxIndex);
@@ -210,12 +249,10 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       // If click is not near any box, deselect any selected box
       setSelectedBoxIndex(null);
     }
-  
+
     // Clear the temporary rectangle
     setLastTempRect(null);
   };
-  
-
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (
@@ -260,32 +297,26 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 
     setHoveredBoxIndex(hoveredIndex !== -1 ? hoveredIndex : null);
 
-    if (isDrawing && canvasRef.current) {
-      const rect = canvasRef.current.getBoundingClientRect();
+    if (isDrawing && boxCanvasRef.current) {
+      const rect = boxCanvasRef.current.getBoundingClientRect();
       const currentPoint = {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
       };
 
-      // Clear the last temporary rectangle
-      if (lastTempRect) {
-        redrawCanvasArea(
-          { x: lastTempRect.x1, y: lastTempRect.y1 },
-          { x: lastTempRect.x2, y: lastTempRect.y2 }
-        );
-      }
-
-      // Set the new temporary rectangle
-      setLastTempRect({
-        x1: startPoint.x,
-        y1: startPoint.y,
-        x2: currentPoint.x,
-        y2: currentPoint.y,
-      });
-
       // Draw the new temporary rectangle
-      const context = canvasRef.current.getContext("2d");
+      const context = boxCanvasRef.current.getContext("2d");
       if (context) {
+        // Clear previous temporary rectangle
+        context.clearRect(
+          0,
+          0,
+          boxCanvasRef.current.width,
+          boxCanvasRef.current.height
+        );
+        // Redraw permanent boxes
+        drawBoxes();
+        // Draw new temporary rectangle
         context.strokeStyle = "red";
         context.lineWidth = 2;
         context.beginPath();
@@ -332,18 +363,58 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     drawBoxes(); // Redraw boxes that intersect with the area
   };
 
-
+  // return (
+  //   <div
+  //     style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+  //   >
+  //     <canvas
+  //       ref={canvasRef}
+  //       onMouseDown={handleMouseDown}
+  //       onMouseUp={handleMouseUp}
+  //       onMouseMove={handleMouseMove}
+  //       style={{ marginBottom: "10px" }}
+  //     />
+  //   </div>
+  // );
 
   return (
     <div
-      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+      style={{
+        position: "relative",
+        width: imageSize.width,
+        height: imageSize.height,
+      }}
     >
+      <canvas
+        ref={underCanvasRef}
+        style={{ position: "absolute", left: 0, top: 0, zIndex: 0 }}
+      />
       <canvas
         ref={canvasRef}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
-        style={{ marginBottom: "10px" }}
+        style={{ position: "absolute", left: 0, top: 0, zIndex: 1 }}
+      />
+      <canvas
+        ref={boxCanvasRef}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          zIndex: 2,
+          visibility: showBoundingBoxes ? "visible" : "hidden",
+        }}
+      />
+      <canvas
+        ref={maskCanvasRef}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        style={{ position: "absolute", left: 0, top: 0, zIndex: 3 }}
       />
     </div>
   );
