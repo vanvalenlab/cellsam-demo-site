@@ -1,8 +1,7 @@
 import React, { useRef, useEffect, useState, MouseEvent } from "react";
-import { TransformWrapper, TransformComponent  } from "react-zoom-pan-pinch";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { Transform } from "stream";
 import { transform } from "typescript";
-
 
 interface ImageCanvasProps {
   imageSrc: string;
@@ -40,21 +39,48 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   const imageRef = useRef(new Image());
   const maskImageRef = useRef(new Image());
 
+  // For panning vs bbox drawing
+  const [isShiftPressed, setIsShiftPressed] = useState(false);
+
+
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
 
   const [transformState, setTransformState] = useState({
-
     scale: 1,
     positionX: 0,
     positionY: 0,
   });
+  // check for shift key
+  useEffect(() => {
+    const downHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') {
+        setIsShiftPressed(true);
+      }
+    };
+
+    const upHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') {
+        setIsShiftPressed(false);
+      }
+    };
+
+    window.addEventListener('keydown', downHandler);
+    window.addEventListener('keyup', upHandler);
+
+    // Cleanup event listeners
+    return () => {
+      window.removeEventListener('keydown', downHandler);
+      window.removeEventListener('keyup', upHandler);
+    };
+  }, []);
+
 
   // Hook for drawing image
   // This is a astupid solution that works very well. To avoid he flashing
-  // when things re render, I just draw the image twice. This shouldn't be 
-  // necessary, but I don't notice a latency issue, so I'll leave as is. 
+  // when things re render, I just draw the image twice. This shouldn't be
+  // necessary, but I don't notice a latency issue, so I'll leave as is.
   // If someone wants to refactor this, basically think about having 3
   // canvas instead of 4. Image, box, mask.
   useEffect(() => {
@@ -63,7 +89,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 
   // Hook for drawing the segmentation mask
   useEffect(() => {
-   drawMasks(); 
+    drawMasks();
   }, [segmentationMaskSrc]);
 
   useEffect(() => {
@@ -78,7 +104,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       const boxCanvas = boxCanvasRef.current;
       const context = canvas?.getContext("2d");
       const underContext = underCanvas?.getContext("2d");
-
 
       if (
         canvas &&
@@ -124,7 +149,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       image.src = segmentationMaskSrc;
     } else {
       if (canvas && context) {
-      context.clearRect(0, 0, canvas.width, canvas.height);
+        context.clearRect(0, 0, canvas.width, canvas.height);
       }
     }
   };
@@ -135,7 +160,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 
     if (canvas && context) {
       context.clearRect(0, 0, canvas.width, canvas.height);
-
 
       boundingBoxes.forEach((box, index) => {
         // Set the style for the hovered box
@@ -172,12 +196,10 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    const clickX = (e.clientX - rect.left) // - position.x) / scale;
-    const clickY = (e.clientY - rect.top )//- position.y) / scale;
+    const clickX = e.clientX - rect.left; // - position.x) / scale;
+    const clickY = e.clientY - rect.top; //- position.y) / scale;
 
     // back to original coordinates
-
-
 
     // Check if a box is clicked
     const clickedBoxIndex = boundingBoxes.findIndex(
@@ -190,6 +212,12 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 
     if (e.shiftKey) {
       // If Shift key is pressed and a box is clicked, select the box
+      setStartPoint({ x: clickX, y: clickY });
+      setIsDrawing(true);
+      setSelectedBoxIndex(null);
+      isBoxSelection = false;
+    } else {
+      // If Shift key is not pressed, start drawing a new box or deselect existing box
       if (clickedBoxIndex !== -1) {
         setSelectedBoxIndex(clickedBoxIndex);
         isBoxSelection = true;
@@ -197,12 +225,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
         setIsDrawing(false);
         setSelectedBoxIndex(null);
       }
-    } else {
-      // If Shift key is not pressed, start drawing a new box or deselect existing box
-      setStartPoint({ x: clickX, y: clickY });
-      setIsDrawing(true);
-      setSelectedBoxIndex(null);
-      isBoxSelection = false;
     }
   };
 
@@ -212,7 +234,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     const rect = canvasRef.current.getBoundingClientRect();
     const mouseUpX = e.clientX - rect.left;
     const mouseUpY = e.clientY - rect.top;
-
 
     // const mouseUpX = (e.clientX - rect.left - transformState.positionX) / transformState.scale;
     // const mouseUpY = (e.clientY - rect.top - transformState.positionY) / transformState.scale;
@@ -227,8 +248,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
         y2: Math.max(startPoint.y, mouseUpY),
       };
       // Update the boundingBoxes state with the new box
-
-
 
       onBoundingBoxesChange([...boundingBoxes, newBox]);
       // Clear the temporary rectangle and exit the drawing mode
@@ -287,6 +306,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
+    console.log(mouseX);
 
     //const mouseX = (e.clientX - rect.left - transformState.positionX) / transformState.scale;
     //const mouseY = (e.clientY - rect.top - transformState.positionY) / transformState.scale;
@@ -340,67 +360,63 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     y: number;
   }
 
-
   return (
-    <TransformWrapper 
-    onTransformed={(ref, transform) => {
-      setTransformState({
-        scale: transform.scale,
-        positionX: transform.positionX,
-        positionY: transform.positionY,
-      });
-    }
-  }
-    panning={{
-    velocityDisabled: true,
-    disabled: true,
-  }}
-  pinch={{
-    disabled: false, // Enable pinch actions
-  }}
-  >
-      <TransformComponent>
-    <div
-      style={{
-        position: "relative",
-        width: imageSize.width,
-        height: imageSize.height,
+    <TransformWrapper
+      onTransformed={(ref, transform) => {
+        setTransformState({
+          scale: transform.scale,
+          positionX: transform.positionX,
+          positionY: transform.positionY,
+        });
+      }}
+      panning={{
+        disabled: isShiftPressed, // Disable panning when Shift key is pressed
+      }}
+      pinch={{
+        disabled: false, // Enable pinch actions
       }}
     >
-      <canvas
-        ref={underCanvasRef}
-        style={{ position: "absolute", left: 0, top: 0, zIndex: 0 }}
-      />
-      <canvas
-        ref={canvasRef}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-        style={{ position: "absolute", left: 0, top: 0, zIndex: 1 }}
-      />
-      <canvas
-        ref={boxCanvasRef}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          zIndex: 2,
-          visibility: showBoundingBoxes ? "visible" : "hidden",
-        }}
-      />
-      <canvas
-        ref={maskCanvasRef}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-        style={{ position: "absolute", left: 0, top: 0, zIndex: 3 }}
-      />
-    </div>
-
-        </TransformComponent>
+      <TransformComponent>
+        <div
+          style={{
+            position: "relative",
+            width: imageSize.width,
+            height: imageSize.height,
+          }}
+        >
+          <canvas
+            ref={underCanvasRef}
+            style={{ position: "absolute", left: 0, top: 0, zIndex: 0 }}
+          />
+          <canvas
+            ref={canvasRef}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+            style={{ position: "absolute", left: 0, top: 0, zIndex: 1 }}
+          />
+          <canvas
+            ref={boxCanvasRef}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              zIndex: 2,
+              visibility: showBoundingBoxes ? "visible" : "hidden",
+            }}
+          />
+          <canvas
+            ref={maskCanvasRef}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+            style={{ position: "absolute", left: 0, top: 0, zIndex: 3 }}
+          />
+        </div>
+      </TransformComponent>
     </TransformWrapper>
   );
 };
