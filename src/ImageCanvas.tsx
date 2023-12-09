@@ -1,4 +1,8 @@
 import React, { useRef, useEffect, useState, MouseEvent } from "react";
+import { TransformWrapper, TransformComponent  } from "react-zoom-pan-pinch";
+import { Transform } from "stream";
+import { transform } from "typescript";
+
 
 interface ImageCanvasProps {
   imageSrc: string;
@@ -40,6 +44,13 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
 
+  const [transformState, setTransformState] = useState({
+
+    scale: 1,
+    positionX: 0,
+    positionY: 0,
+  });
+
   // Hook for drawing image
   // This is a astupid solution that works very well. To avoid he flashing
   // when things re render, I just draw the image twice. This shouldn't be 
@@ -67,6 +78,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       const boxCanvas = boxCanvasRef.current;
       const context = canvas?.getContext("2d");
       const underContext = underCanvas?.getContext("2d");
+
 
       if (
         canvas &&
@@ -160,8 +172,12 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    const clickX = e.clientX - rect.left;
-    const clickY = e.clientY - rect.top;
+    const clickX = (e.clientX - rect.left) // - position.x) / scale;
+    const clickY = (e.clientY - rect.top )//- position.y) / scale;
+
+    // back to original coordinates
+
+
 
     // Check if a box is clicked
     const clickedBoxIndex = boundingBoxes.findIndex(
@@ -197,6 +213,10 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     const mouseUpX = e.clientX - rect.left;
     const mouseUpY = e.clientY - rect.top;
 
+
+    // const mouseUpX = (e.clientX - rect.left - transformState.positionX) / transformState.scale;
+    // const mouseUpY = (e.clientY - rect.top - transformState.positionY) / transformState.scale;
+
     // If currently drawing a new box, finalize it
     if (isDrawing) {
       // Create the new box
@@ -207,6 +227,9 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
         y2: Math.max(startPoint.y, mouseUpY),
       };
       // Update the boundingBoxes state with the new box
+
+
+
       onBoundingBoxesChange([...boundingBoxes, newBox]);
       // Clear the temporary rectangle and exit the drawing mode
       setIsDrawing(false);
@@ -265,6 +288,9 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
 
+    //const mouseX = (e.clientX - rect.left - transformState.positionX) / transformState.scale;
+    //const mouseY = (e.clientY - rect.top - transformState.positionY) / transformState.scale;
+
     const hoveredIndex = boundingBoxes.findIndex(
       (box) =>
         mouseX >= box.x1 &&
@@ -316,6 +342,24 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 
 
   return (
+    <TransformWrapper 
+    onTransformed={(ref, transform) => {
+      setTransformState({
+        scale: transform.scale,
+        positionX: transform.positionX,
+        positionY: transform.positionY,
+      });
+    }
+  }
+    panning={{
+    velocityDisabled: true,
+    disabled: true,
+  }}
+  pinch={{
+    disabled: false, // Enable pinch actions
+  }}
+  >
+      <TransformComponent>
     <div
       style={{
         position: "relative",
@@ -355,6 +399,9 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
         style={{ position: "absolute", left: 0, top: 0, zIndex: 3 }}
       />
     </div>
+
+        </TransformComponent>
+    </TransformWrapper>
   );
 };
 
