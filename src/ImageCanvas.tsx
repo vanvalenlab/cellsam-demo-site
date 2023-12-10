@@ -196,8 +196,12 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    const clickX = e.clientX - rect.left; // - position.x) / scale;
-    const clickY = e.clientY - rect.top; //- position.y) / scale;
+    const scale = transformState.scale;
+
+    const clickX = (e.clientX - rect.left) / scale; // - position.x) / scale;
+    const clickY = (e.clientY - rect.top) / scale; //- position.y) / scale;
+
+    const adjustedClickTolerance = clickTolerance * scale;
 
     // back to original coordinates
 
@@ -209,6 +213,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
         clickY >= box.y1 - clickTolerance &&
         clickY <= box.y2 + clickTolerance
     );
+    console.log('clickedBoxIndex', clickedBoxIndex);
 
     if (e.shiftKey) {
       // If Shift key is pressed and a box is clicked, select the box
@@ -304,9 +309,9 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    console.log(mouseX);
+    const scale = transformState.scale;
+    const mouseX = (e.clientX - rect.left) / scale;
+    const mouseY = (e.clientY - rect.top) / scale;
 
     //const mouseX = (e.clientX - rect.left - transformState.positionX) / transformState.scale;
     //const mouseY = (e.clientY - rect.top - transformState.positionY) / transformState.scale;
@@ -318,6 +323,9 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
         mouseY >= box.y1 &&
         mouseY <= box.y2
     );
+
+    // console.log(hoveredIndex);
+    // console.log(boundingBoxes);
 
     setHoveredBoxIndex(hoveredIndex !== -1 ? hoveredIndex : null);
 
