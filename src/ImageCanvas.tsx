@@ -337,8 +337,8 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     if (isDrawing && boxCanvasRef.current) {
       const rect = boxCanvasRef.current.getBoundingClientRect();
       const currentPoint = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
+        x: (e.clientX - rect.left) / scale,
+        y: (e.clientY - rect.top) / scale,
       };
 
       // Draw the new temporary rectangle
