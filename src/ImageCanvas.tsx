@@ -42,7 +42,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   // For panning vs bbox drawing
   const [isShiftPressed, setIsShiftPressed] = useState(false);
 
-
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
@@ -55,27 +54,26 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   // check for shift key
   useEffect(() => {
     const downHandler = (e: KeyboardEvent) => {
-      if (e.key === 'Shift') {
+      if (e.key === "Shift") {
         setIsShiftPressed(true);
       }
     };
 
     const upHandler = (e: KeyboardEvent) => {
-      if (e.key === 'Shift') {
+      if (e.key === "Shift") {
         setIsShiftPressed(false);
       }
     };
 
-    window.addEventListener('keydown', downHandler);
-    window.addEventListener('keyup', upHandler);
+    window.addEventListener("keydown", downHandler);
+    window.addEventListener("keyup", upHandler);
 
     // Cleanup event listeners
     return () => {
-      window.removeEventListener('keydown', downHandler);
-      window.removeEventListener('keyup', upHandler);
+      window.removeEventListener("keydown", downHandler);
+      window.removeEventListener("keyup", upHandler);
     };
   }, []);
-
 
   // Hook for drawing image
   // This is a astupid solution that works very well. To avoid he flashing
@@ -213,7 +211,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
         clickY >= box.y1 - clickTolerance &&
         clickY <= box.y2 + clickTolerance
     );
-    console.log('clickedBoxIndex', clickedBoxIndex);
 
     if (e.shiftKey) {
       // If Shift key is pressed and a box is clicked, select the box
@@ -224,7 +221,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     } else {
       // If Shift key is not pressed, start drawing a new box or deselect existing box
       if (clickedBoxIndex !== -1) {
-        console.log("setting le setter");
         setSelectedBoxIndex(clickedBoxIndex);
         isBoxSelection = true;
       } else {
@@ -241,9 +237,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     const scale = transformState.scale;
     const mouseUpX = (e.clientX - rect.left) / scale;
     const mouseUpY = (e.clientY - rect.top) / scale;
-
-    // const mouseUpX = (e.clientX - rect.left - transformState.positionX) / transformState.scale;
-    // const mouseUpY = (e.clientY - rect.top - transformState.positionY) / transformState.scale;
 
     // If currently drawing a new box, finalize it
     if (isDrawing) {
@@ -276,7 +269,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       setSelectedBoxIndex(clickedBoxIndex);
     } else {
       // If click is not near any box, deselect any selected box
-      console.log("not near a box, deselecting");
       setSelectedBoxIndex(null);
     }
 
@@ -284,7 +276,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
-    console.log("key down, selected index", selectedBoxIndex);
     if (
       selectedBoxIndex !== null &&
       (event.key === "Delete" || event.key === "Backspace")
@@ -295,7 +286,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       );
       onBoundingBoxesChange(newBoxes);
       setSelectedBoxIndex(null); // Reset selectedBoxIndex after deletion
-      console.log(boundingBoxes);
     } else if (event.key === "Escape") {
       // Logic to exit the bounding box drawing process
       setIsDrawing(false);
@@ -318,9 +308,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     const mouseX = (e.clientX - rect.left) / scale;
     const mouseY = (e.clientY - rect.top) / scale;
 
-    //const mouseX = (e.clientX - rect.left - transformState.positionX) / transformState.scale;
-    //const mouseY = (e.clientY - rect.top - transformState.positionY) / transformState.scale;
-
     const hoveredIndex = boundingBoxes.findIndex(
       (box) =>
         mouseX >= box.x1 &&
@@ -328,9 +315,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
         mouseY >= box.y1 &&
         mouseY <= box.y2
     );
-
-    // console.log(hoveredIndex);
-    // console.log(boundingBoxes);
 
     setHoveredBoxIndex(hoveredIndex !== -1 ? hoveredIndex : null);
 
