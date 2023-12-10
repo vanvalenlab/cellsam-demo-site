@@ -104,7 +104,7 @@ function App() {
             >
               <ul className="list-disc list-inside pl-6">
                 <li>
-                  Images should be in PNG format, and be less than 1024 pixels
+                  Images should be in channel-last format and be less than 1024 pixels
                   along each axis.
                 </li>
                 <li>
@@ -115,7 +115,7 @@ function App() {
                   Other formats or channel configurations will throw an error.
                 </li>
                 <li>
-                  The computed mask is available for download as a <code>.npy</code> file.
+                  The computed mask is available for download as a <code>.tiff</code> file.
                 </li>
               </ul>
             </div>

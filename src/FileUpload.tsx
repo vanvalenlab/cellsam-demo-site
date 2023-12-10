@@ -106,11 +106,6 @@ const FileUpload = () => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
-
-  useEffect(() => {
-    console.log("overlayImage updated:", overlayImage);
-  }, [overlayImage]);
-
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -142,7 +137,7 @@ const FileUpload = () => {
     link.download = "downloaded_image"; // Set the download file name
 
     if (returnedImage) {
-      link.download = "downloaded_mask.npy"; // Set the extension directly
+      link.download = "downloaded_mask.tiff"; // Set the extension directly
     }
 
     document.body.appendChild(link);
@@ -228,7 +223,7 @@ const FileUpload = () => {
                 const maskUrl = URL.createObjectURL(maskBlob);
                 setSegmentationMask(maskUrl);
               });
-            } else if (filename.endsWith("mask.npy")) {
+            } else if (filename.endsWith("mask.tiff")) {
               const file = zip.file(filename);
               if (file) {
                 file.async("blob").then((b) => {
