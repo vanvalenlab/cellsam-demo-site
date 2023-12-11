@@ -90,7 +90,9 @@ const FileUpload = () => {
   const [segmentationMask, setSegmentationMask] = useState<string | null>(null);
   // In FileUpload component
   const [showBoundingBoxes, setShowBoundingBoxes] = useState(true);
-  const [canvasCleared, setCanvasCleared] = useState(false);
+  const [nuclearFile, setNuclearFile] = useState<File | null>(null);
+  const [wholecellFile, setWholecellFile] = useState<File | null>(null);
+
 
   // Checkbox change handler
 
