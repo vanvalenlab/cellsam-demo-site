@@ -1,7 +1,5 @@
 import React, { useRef, useEffect, useState, MouseEvent } from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import { Transform } from "stream";
-import { transform } from "typescript";
 
 interface ImageCanvasProps {
   imageSrc: string;
@@ -28,7 +26,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
   const [selectedBoxIndex, setSelectedBoxIndex] = useState<number | null>(null);
   const [hoveredBoxIndex, setHoveredBoxIndex] = useState<number | null>(null);
   const clickTolerance = 1;
-  let isBoxSelection = false; // Flag to indicate if the current action is box selection
 
   // A stupid solution but I think it could work?
   const underCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -199,7 +196,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     const clickX = (e.clientX - rect.left) / scale; // - position.x) / scale;
     const clickY = (e.clientY - rect.top) / scale; //- position.y) / scale;
 
-    const adjustedClickTolerance = clickTolerance * scale;
 
     // back to original coordinates
 
@@ -217,12 +213,10 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       setStartPoint({ x: clickX, y: clickY });
       setIsDrawing(true);
       setSelectedBoxIndex(null);
-      isBoxSelection = false;
     } else {
       // If Shift key is not pressed, start drawing a new box or deselect existing box
       if (clickedBoxIndex !== -1) {
         setSelectedBoxIndex(clickedBoxIndex);
-        isBoxSelection = true;
       } else {
         setIsDrawing(false);
         setSelectedBoxIndex(null);
@@ -280,7 +274,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       selectedBoxIndex !== null &&
       (event.key === "Delete" || event.key === "Backspace")
     ) {
-      const deletedBox = boundingBoxes[selectedBoxIndex];
       const newBoxes = boundingBoxes.filter(
         (_, index) => index !== selectedBoxIndex
       );
@@ -351,11 +344,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
       }
     }
   };
-
-  interface Point {
-    x: number;
-    y: number;
-  }
 
   return (
     <TransformWrapper

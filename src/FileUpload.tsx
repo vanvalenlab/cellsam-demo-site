@@ -134,7 +134,7 @@ const FileUpload = () => {
   const downloadImage = (imageSrc: string, returnedImage?: boolean) => {
     const link = document.createElement("a");
     link.href = imageSrc;
-    link.download = "downloaded_image"; // Set the download file name
+    link.download = "mask.tiff"; // Set the download file name
 
     if (returnedImage) {
       link.download = "downloaded_mask.tiff"; // Set the extension directly
@@ -217,20 +217,23 @@ const FileUpload = () => {
         const blob = await response.blob();
         JSZip.loadAsync(blob).then((zip) => {
           const maskFile = zip.file("segmentation_mask.png");
+          const maskData = zip.file("mask.tiff");
+          console.log("le data");
+          console.log(maskFile);
+          console.log(maskData);
           Object.keys(zip.files).forEach((filename) => {
             if (maskFile) {
               maskFile.async("blob").then((maskBlob) => {
                 const maskUrl = URL.createObjectURL(maskBlob);
                 setSegmentationMask(maskUrl);
               });
-            } else if (filename.endsWith("mask.tiff")) {
-              const file = zip.file(filename);
-              if (file) {
-                file.async("blob").then((b) => {
-                  const imageUrl = URL.createObjectURL(b);
-                  setOverlayMask(imageUrl); // Assuming setOverlayImage is your state setter
-                });
-              }
+            } 
+            if (maskData) {
+              console.log('haha found you');
+              maskData.async("blob").then((maskBlob) => {
+                const maskUrl = URL.createObjectURL(maskBlob);
+                setOverlayMask(maskUrl);
+              });
             }
           });
         });
@@ -253,6 +256,7 @@ const FileUpload = () => {
       // If there are bounding boxes or a segmentation mask, clear only those
       setBoundingBoxes([]);
       setSegmentationMask(null);
+      setOverlayMask(null);
     } else {
       // If there are no bounding boxes or masks, clear the image
       setUploadedImageFile(null);
@@ -373,18 +377,16 @@ const FileUpload = () => {
                 <button
                   onClick={() => {
                     // Check if overlayImage is available; otherwise, check if uploadedImageFile is not null before calling createObjectURL
-                    const imageSrc = overlayImage
-                      ? overlayImage
-                      : uploadedImageFile
-                      ? URL.createObjectURL(uploadedImageFile)
-                      : null;
-                    if (imageSrc) {
-                      downloadImage(imageSrc);
+                    console.log("overlay mask");
+                    console.log(overlayMask);
+                    if (overlayMask) {
+                      downloadImage(overlayMask);
                     }
                   }}
-                  className="absolute top-2 right-2 left-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center"
-                >
-                  <DownloadIcon className="h-5 w-5" />
+                  disabled={!overlayMask}
+                  className={`absolute top-2 right-2 left-2 bg-white p-2 rounded text-black hover:bg-gray-100 w-10 h-10 flex justify-center items-center ${!overlayMask ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <DownloadIcon className="h-5 w-5" />
                 </button>
               </div>
             </div>
