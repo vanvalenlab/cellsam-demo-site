@@ -91,7 +91,7 @@ function App() {
           <div>
             {/* content here */}
             <h3 className="text-xl font-bold text-gray-800 mb-4">
-              Image Upload Guidelines
+              Usage Guidelines
             </h3>
             <div
               className="mt-4 text-left"
@@ -108,14 +108,16 @@ function App() {
                   along each axis.
                 </li>
                 <li>
-                  Acceptable channels: single channel, 2 channel (nuclear and
-                  whole cell), or 3 channel (blank, nuclear, and whole cell).
+                  After uploading, select each channel type. Channels should correspond to nuclear, wholecell, or blank. 
+                </li>
+                <li>
+                  Click on Find Boxes to generate bounding box prompts. After generation, you can delete the boxes by clicking on the box and pressing the delete key. To add a box, hold Shift and drag on the image.
+                </li>
+                <li>
+                  Once you're satisfied with the boxes, click on the Compute Mask button to generate a mask for each box. The computed mask is available for download as a <code>.tiff</code> file.
                 </li>
                 <li>
                   Other formats or channel configurations will throw an error.
-                </li>
-                <li>
-                  The computed mask is available for download as a <code>.tiff</code> file.
                 </li>
               </ul>
             </div>

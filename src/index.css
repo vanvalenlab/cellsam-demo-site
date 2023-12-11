@@ -167,6 +167,7 @@ code {
   cursor: pointer;
   margin-right: 8px; /* Match horizontal space with .button-base */
   margin-bottom: 0px; /* Match vertical space with .button-base */
+  font-weight: bold;
 }
 
 
