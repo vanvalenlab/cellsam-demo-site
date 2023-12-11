@@ -196,7 +196,6 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
     const clickX = (e.clientX - rect.left) / scale; // - position.x) / scale;
     const clickY = (e.clientY - rect.top) / scale; //- position.y) / scale;
 
-
     // back to original coordinates
 
     // Check if a box is clicked

@@ -116,6 +116,8 @@ code {
   align-items: center;
   justify-content: center;
   margin-right: 8px; /* Space between buttons */
+  margin-bottom: 8px;
+  margin-top: 20px;
   transition: background-color 0.3s; /* Smooth transition for hover effect */
 }
 
@@ -154,3 +156,42 @@ code {
   cursor: not-allowed;
 }
 
+/* Existing CSS ... */
+
+/* Channel Button Styles */
+.channel-button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  transition: background-color 0.3s, border-color 0.3s;
+  cursor: pointer;
+  margin-right: 8px; /* Match horizontal space with .button-base */
+  margin-bottom: 0px; /* Match vertical space with .button-base */
+}
+
+
+
+.channel-nuclear{
+  background-color: #4caf50; /* Green background */
+  color: white;
+}
+
+.channel-wholecell {
+  background-color: #2196f3; /* Blue background */
+  color: white;
+}
+
+.channel-blank {
+  background-color: #f44336; /* Red background */
+  color: white;
+}
+
+.channel-button:hover {
+  opacity: 0.8;
+}
+
+.channel-button:active {
+  border-color: #333; /* Dark border for active state */
+}
+
+/* Rest of your existing CSS ... */
