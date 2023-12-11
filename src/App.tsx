@@ -117,6 +117,9 @@ function App() {
                   Once you're satisfied with the boxes, click on the Compute Mask button to generate a mask for each box. The computed mask is available for download as a <code>.tiff</code> file.
                 </li>
                 <li>
+                  Click Clear once to remove all boxes and masks. Click Clear twice to remove the uploaded image.
+                </li>
+                <li>
                   Other formats or channel configurations will throw an error.
                 </li>
               </ul>
