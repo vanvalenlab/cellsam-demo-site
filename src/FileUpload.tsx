@@ -21,9 +21,9 @@ interface IconProps {
   className?: string;
 }
 
-interface IconProps {
-  className?: string;
-}
+type ChannelSelections = {
+  [key: string]: string;
+};
 
 const spinnerStyle: React.CSSProperties = {
   display: "inline-block",
@@ -78,6 +78,8 @@ const Spinner = () => (
   </svg>
 );
 
+const channelTypes = ["wholecell", "nuclear", "blank"];
+
 const FileUpload = () => {
   const [highlight, setHighlight] = useState(false);
   const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
@@ -90,9 +92,56 @@ const FileUpload = () => {
   const [segmentationMask, setSegmentationMask] = useState<string | null>(null);
   // In FileUpload component
   const [showBoundingBoxes, setShowBoundingBoxes] = useState(true);
-  const [nuclearFile, setNuclearFile] = useState<File | null>(null);
-  const [wholecellFile, setWholecellFile] = useState<File | null>(null);
+  const [channelCount, setChannelCount] = useState(3); // Default to 3 channels
 
+  const [channelSelections, setChannelSelections] = useState<ChannelSelections>({
+    channel1: "wholecell",
+    channel2: "nuclear",
+    channel3: "blank",
+  });
+
+  // handling channel stuff
+
+  const determineChannelCount = (imageSrc: string) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(img, 0, 0);
+
+      const imageData = ctx?.getImageData(0, 0, img.width, img.height);
+      const data = imageData?.data;
+
+      if (data) {
+        // Assuming the standard formats (RGB or RGBA)
+        const channels = data.length / (img.width * img.height);
+        setChannelCount(channels); // Update your channel count state
+      }
+    };
+    img.src = imageSrc;
+  };
+
+  const handleChannelCountChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const count = parseInt(event.target.value, 10);
+    setChannelCount(count);
+    setChannelSelections({}); // Reset channel selections
+  };
+
+
+  const handleChannelTypeChange = (channel: string, type: string) => {
+    setChannelSelections(prev => ({ ...prev, [channel]: type }));
+  };
+
+  const updateFormData = (formData: FormData) => {
+    formData.append("channel_count", channelCount.toString());
+    Object.keys(channelSelections).forEach((channel) => {
+      // Use type assertion here
+      formData.append(channel, channelSelections[channel as keyof ChannelSelections]);
+    });
+  };
 
   // Checkbox change handler
 
@@ -129,6 +178,8 @@ const FileUpload = () => {
       }
 
       setUploadedImageFile(file);
+      const imageSrc = URL.createObjectURL(file);
+      determineChannelCount(imageSrc);
     },
     [uploadedImageFile]
   );
@@ -152,6 +203,7 @@ const FileUpload = () => {
     return <div style={spinnerStyle}></div>;
   };
 
+
   const embedImage = async () => {
     if (!uploadedImageFile) return;
 
@@ -159,6 +211,7 @@ const FileUpload = () => {
     try {
       const formData = new FormData();
       formData.append("image_file", uploadedImageFile); // append the file directly, not as a binary string
+      updateFormData(formData);
 
       const response = await fetch(
         /*"https://fastapi-bgmt2kuix.brevlab.com/process_image/",*/
@@ -204,6 +257,7 @@ const FileUpload = () => {
       formData.append("image_file", uploadedImageFile); // append the file directly, not as a binary string
       formData.append("embedding_file", "");
       formData.append("bounding_boxes", JSON.stringify(boundingBoxes));
+      updateFormData(formData);
 
       const response = await fetch(
         /*"https://fastapi-bgmt2kuix.brevlab.com/process_image/",*/
@@ -321,10 +375,43 @@ const FileUpload = () => {
             }
           }}
         />
+
         <label htmlFor="fileElem" className="cursor-pointer">
           <p className="text-gray-700">Drag and drop or click to browse</p>
           <p className="text-lg font-semibold">Upload file</p>
         </label>
+      </div>
+      <div className="channel-selection">
+        {/* <label htmlFor="channelCount">Number of Channels:</label> */}
+        {/* <select
+          name="channelCount"
+          value={channelCount}
+          onChange={handleChannelCountChange}
+        >
+          {[1, 2, 3, 4, 5].map((number) => (
+            <option key={number} value={number}>
+              {number}
+            </option>
+          ))}
+        </select> */}
+        {Array.from({ length: channelCount }, (_, i) => i + 1).map((channel) => (
+          <div key={channel}>
+            <label htmlFor={`channel${channel}`}>Channel {channel} Type:</label>
+            <select
+              name={`channel${channel}`}
+              value={channelSelections[`channel${channel}`] || ""}
+              onChange={(e) =>
+                handleChannelTypeChange(`channel${channel}`, e.target.value)
+              }
+            >
+              {channelTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+        ))}
       </div>
 
       {(uploadedImageFile || overlayImage) && (
@@ -362,10 +449,7 @@ const FileUpload = () => {
             <div className="flex flex-col pt-5">
               {renderSpinner()} {/* Render the spinner */}
               {/* Update this condition to check both uploadedImageFile and overlayImage */}
-              <p className="ml-5 text-lg font-semibold">
-                {overlayImage ? "Processed Image" : "Input Image"}
-              </p>
-              <div className="relative w-[fit-content] max-w-[90%] max-h-[70vh] overflow-auto flex justify-center items-center">
+              <div className="relative w-[fit-content] max-w-[100%] max-h-[70vh] overflow-auto flex justify-center items-center">
                 {uploadedImageFile && (
                   <ImageCanvas
                     boundingBoxes={boundingBoxes}
