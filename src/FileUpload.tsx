@@ -18,6 +18,11 @@ function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
 }
 
+const capitalize = (string: string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+
 interface IconProps {
   className?: string;
 }
@@ -84,6 +89,8 @@ const DownloadIcon: React.FC<IconProps> = (props) => {
   );
 };
 
+
+
 const ChannelButton: React.FC<ChannelButtonProps> = ({
   channelIndex,
   channelType,
@@ -100,7 +107,7 @@ const ChannelButton: React.FC<ChannelButtonProps> = ({
 
   return (
     <button onClick={cycleChannelType} className={buttonClass}>
-      {channelType}
+      {capitalize(channelType)}
     </button>
   );
 };
@@ -244,14 +251,12 @@ const FileUpload = () => {
       );
 
       if (response.ok) {
-        console.log(response);
         const blob = await response.blob();
         JSZip.loadAsync(blob).then((zip) => {
           const bboxFile = zip.file("bounding_boxes.json");
           if (bboxFile) {
             bboxFile.async("string").then((bboxString) => {
               const bboxJson = JSON.parse(bboxString);
-              console.log(boundingBoxes);
               setBoundingBoxes(bboxJson);
             });
           }
@@ -290,14 +295,10 @@ const FileUpload = () => {
       );
 
       if (response.ok) {
-        console.log(response);
         const blob = await response.blob();
         JSZip.loadAsync(blob).then((zip) => {
           const maskFile = zip.file("segmentation_mask.png");
           const maskData = zip.file("mask.tiff");
-          console.log("le data");
-          console.log(maskFile);
-          console.log(maskData);
           Object.keys(zip.files).forEach((filename) => {
             if (maskFile) {
               maskFile.async("blob").then((maskBlob) => {
@@ -306,7 +307,6 @@ const FileUpload = () => {
               });
             }
             if (maskData) {
-              console.log("haha found you");
               maskData.async("blob").then((maskBlob) => {
                 const maskUrl = URL.createObjectURL(maskBlob);
                 setOverlayMask(maskUrl);
@@ -434,8 +434,6 @@ const FileUpload = () => {
                 <button
                   onClick={() => {
                     // Check if overlayImage is available; otherwise, check if uploadedImageFile is not null before calling createObjectURL
-                    console.log("overlay mask");
-                    console.log(overlayMask);
                     if (overlayMask) {
                       downloadImage(overlayMask);
                     }
@@ -477,7 +475,7 @@ const FileUpload = () => {
                 className="button-base process-image-button"
                 disabled={isLoading}
               >
-                Process Image
+                Compute Mask
               </button>
             </div>
           </>
