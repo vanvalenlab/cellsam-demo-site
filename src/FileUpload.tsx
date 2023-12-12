@@ -10,11 +10,12 @@ import React, {
 import JSZip from "jszip";
 import Notification from "./Notification";
 import ImageCanvas, { BoundingBox } from "./ImageCanvas"; // Import ImageCanvas and BoundingBox type
+import DeepCellButton from "./DeepCellButton";
 
 // ... other necessary imports ...
-//const endpoint = "http://131.215.2.187:8002";
+const endpoint = "http://131.215.2.187:8000";
 // Use this endpoint
-const endpoint = "https://fastapi-bgmt2kuix.brevlab.com";
+//const endpoint = "https://fastapi-bgmt2kuix.brevlab.com";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
@@ -494,6 +495,12 @@ const FileUpload = () => {
               >
                 Compute Mask
               </button>
+              <DeepCellButton
+                myUrl="https://label.deepcell.org"
+                uploadedImage={uploadedImageFile} // Assuming this is your state for the uploaded image
+                maskFile={overlayMask} // You should have a similar state or logic to get the mask file
+                axes="BYXC"
+              />
             </div>
           </>
         </>
