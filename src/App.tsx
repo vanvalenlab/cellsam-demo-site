@@ -26,7 +26,7 @@ function App() {
             <h3 className="text-2xl font-bold text-gray-800 mb-2">
               Quickstart
               <span className="text-sm text-gray-600 ml-2">
-                (hover on images!)
+                (hover on images)
               </span>
             </h3>
 
