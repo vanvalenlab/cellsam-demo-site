@@ -3,31 +3,33 @@ import React, { useState, useEffect } from 'react';
 interface HoverableGifProps {
   staticImage: string;
   animatedGif: string;
-  duration?: number; // duration is optional and defaults to 3000
+  duration?: number; // Optional, default to 3000 milliseconds
 }
 
 function HoverableGif({ staticImage, animatedGif, duration = 3000 }: HoverableGifProps) {
   const [imageSrc, setImageSrc] = useState<string>(animatedGif);
-  const [isHovering, setIsHovering] = useState<boolean>(false);
+  const [hasPlayed, setHasPlayed] = useState<boolean>(false);
 
   useEffect(() => {
+    // Switch to the static image after the first play
     const timer = setTimeout(() => {
       setImageSrc(staticImage);
+      setHasPlayed(true);
     }, duration);
 
     return () => clearTimeout(timer);
-  }, [duration, staticImage, animatedGif]);
+  }, [duration, staticImage]);
 
   const handleMouseEnter = () => {
-    setIsHovering(true);
-    setImageSrc(animatedGif);
+    // On hover, if it has played once, show the animated GIF
+    if (hasPlayed) {
+      setImageSrc(animatedGif);
+    }
   };
 
   const handleMouseLeave = () => {
-    setIsHovering(false);
-    if (!isHovering) {
-      setImageSrc(staticImage);
-    }
+    // Revert back to the static image on mouse leave
+    setImageSrc(staticImage);
   };
 
   return (
