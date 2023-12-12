@@ -195,4 +195,42 @@ code {
   border-color: #333; /* Dark border for active state */
 }
 
-/* Rest of your existing CSS ... */
+
+/* New styles for channel dropdown */
+.channel-dropdown {
+  padding: 8px 16px; /* Consistent padding with buttons */
+  border-radius: 4px; /* Rounded corners like buttons */
+  border: 2px solid #ddd; /* Light gray border */
+  background-color: white; /* White background */
+  font-weight: bold; /* Bold text */
+  color: #555; /* Dark gray text color for visibility */
+  margin-right: 8px; /* Horizontal spacing */
+  margin-bottom: 8px; /* Vertical spacing */
+  cursor: pointer; /* Cursor to indicate it's clickable */
+  transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transitions for interactions */
+}
+
+.channel-dropdown:hover {
+  border-color: #bbb; /* Slightly darker border on hover */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow on hover for depth */
+}
+
+.channel-dropdown:focus {
+  border-color: #2196f3; /* Blue border for focus, matching your blue button */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* More pronounced shadow for focus */
+  outline: none; /* Remove default outline */
+}
+
+.channel-dropdown.channel-nuclear {
+  border-color: #4caf50; /* Green border for nuclear */
+}
+
+/* Style for when 'Wholecell' is selected */
+.channel-dropdown.channel-wholecell {
+  border-color: #2196f3; /* Blue border for wholecell */
+}
+
+
+/* You might also want to add specific styles for different channel types if needed */
+
+/* Existing styles... */

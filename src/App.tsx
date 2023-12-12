@@ -6,6 +6,9 @@ import HoverableGif from "./HoverableGif";
 
 import usageStaticImage from './assets/usage.png';
 import usageAnimatedGif from './assets/usage_fast.gif';
+import usageDropdownStaticImage from './assets/usage_dropdown.png';
+import usageDropdownAnimatedGif from './assets/usage_dropdown_fast.gif';
+
 import boxStaticImage from './assets/boxes.png';
 import boxAnimatedGif from './assets/boxes_fast.gif';
 
@@ -32,7 +35,7 @@ function App() {
               <li>
                 After uploading, select whether each image channel is nuclear, wholecell, or blank.
                 <div className="mt-2">
-                  <HoverableGif staticImage={usageStaticImage} animatedGif={usageAnimatedGif}/>
+                  <HoverableGif staticImage={usageDropdownStaticImage} animatedGif={usageDropdownAnimatedGif}/>
                 </div>
               </li>
               <li>

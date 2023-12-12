@@ -13,7 +13,7 @@ function HoverableGif({ staticImage, animatedGif, duration = 3000 }: HoverableGi
   useEffect(() => {
     let timer: NodeJS.Timeout;
 
-    if (playCount < 3) {
+    if (playCount < 4) {
       // Set a timer to switch back to the animated GIF after one loop
       timer = setTimeout(() => {
         setImageSrc(playCount < 2 ? animatedGif : staticImage); // Play the GIF 3 times

@@ -22,8 +22,7 @@ function classNames(...classes: any) {
 
 const capitalize = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
+};
 
 interface IconProps {
   className?: string;
@@ -37,6 +36,28 @@ interface ChannelButtonProps {
   channelType: ChannelType;
   setChannelType: (channelIndex: number, type: ChannelType) => void;
 }
+
+const ChannelSelectionDropdown: React.FC<ChannelButtonProps> = ({
+  channelIndex,
+  channelType,
+  setChannelType,
+}) => {
+  return (
+    <select
+      value={channelType}
+      onChange={(e) =>
+        setChannelType(channelIndex, e.target.value as ChannelType)
+      }
+      className={`channel-dropdown channel-${channelType}`}
+    >
+      {channelOptions.map((option) => (
+        <option key={option} value={option}>
+          {capitalize(option)}
+        </option>
+      ))}
+    </select>
+  );
+};
 
 const spinnerStyle: React.CSSProperties = {
   display: "inline-block",
@@ -90,8 +111,6 @@ const DownloadIcon: React.FC<IconProps> = (props) => {
     </svg>
   );
 };
-
-
 
 const ChannelButton: React.FC<ChannelButtonProps> = ({
   channelIndex,
@@ -243,13 +262,10 @@ const FileUpload = () => {
       formData.append("image_file", uploadedImageFile); // append the file directly, not as a binary string
       updateFormData(formData);
 
-      const response = await fetch(
-        endpoint + "/embed_image/",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch(endpoint + "/embed_image/", {
+        method: "POST",
+        body: formData,
+      });
 
       if (response.ok) {
         const blob = await response.blob();
@@ -406,7 +422,7 @@ const FileUpload = () => {
       </div>
       <div className="channel-selection">
         {channelSelections.map((type, index) => (
-          <ChannelButton
+          <ChannelSelectionDropdown
             key={index}
             channelIndex={index}
             channelType={type}
@@ -452,8 +468,7 @@ const FileUpload = () => {
 
           <>
             <div className="flex flex-row justify-center items-center">
-
-            <button onClick={clearState} className="button-base clear-button">
+              <button onClick={clearState} className="button-base clear-button">
                 Clear
               </button>
               <button
@@ -462,7 +477,6 @@ const FileUpload = () => {
               >
                 {showBoundingBoxes ? "Hide Boxes" : "Show Boxes"}
               </button>
-
 
               <button
                 onClick={embedImage}
