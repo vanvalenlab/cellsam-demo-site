@@ -253,3 +253,13 @@ code {
 .quickstart-guide p {
   font-size: 14px; /* Ensure paragraph text is also smaller */
 }
+
+code {
+  font-family: 'Courier New', Courier, Monaco, Consolas, 'Lucida Console', monospace;
+  background-color: #f4f4f4; /* Light grey background */
+  color: #d63384; /* Distinct text color, often a dark red or blue */
+  padding: 2px 2px; /* Adds some space around the text */
+  border-radius: 4px; /* Optional: rounds the corners */
+  border: 0.5px solid #ccc; /* Light border for definition */
+  font-size: 0.9em; /* Slightly smaller font size */
+}
