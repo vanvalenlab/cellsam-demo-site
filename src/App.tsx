@@ -30,7 +30,7 @@ function App() {
 
             <ul className="space-y-4 text-gray-700">
               <li>
-                Images should be in channel-last format and be less than 1024 pixels along each axis.
+                Images should be in <b>channel-last</b> format and be less than 1024 pixels along each axis.
               </li>
               <li>
                 After uploading, select whether each image channel is nuclear, wholecell, or blank.
@@ -39,16 +39,16 @@ function App() {
                 </div>
               </li>
               <li>
-                Generate bounding box prompts by clicking Find Boxes. Delete boxes by selecting them and pressing delete. Add a box by holding Shift and dragging. Scroll to Zoom in and out.
+                Generate bounding box prompts by clicking <b>Find Boxes</b>. Delete boxes by selecting them and pressing delete. Add a box by holding <b>Shift</b> and dragging. <b>Scroll</b> to zoom in and out.
                 <div className="mt-2">
                   <HoverableGif staticImage={boxStaticImage} animatedGif={boxAnimatedGif}/>
                 </div>
               </li>
               <li>
-                Once you're satisfied with the boxes, click on the Compute Mask button to generate a mask for each box. The computed mask is available for download as a <code>.tiff</code> file.
+                Once you're satisfied with the boxes, click on the <b>Compute Mask</b> button to generate a mask for each box. The computed mask is available for download as a <code>.tiff</code> file.
               </li>
               <li>
-                Click Clear once to remove all boxes and masks. Click Clear twice to remove the uploaded image.
+                Click <b>Clear</b> once to remove all boxes and masks. Click <b>Clear</b> twice to remove the uploaded image.
               </li>
               <li>
                 Other formats or channel configurations will throw an error.
