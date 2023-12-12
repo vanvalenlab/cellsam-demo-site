@@ -12,9 +12,9 @@ import Notification from "./Notification";
 import ImageCanvas, { BoundingBox } from "./ImageCanvas"; // Import ImageCanvas and BoundingBox type
 
 // ... other necessary imports ...
-// const endpoint = "http://131.215.2.187:8000";
+const endpoint = "http://131.215.2.187:8002";
 // Use this endpoint
-const endpoint = "https://fastapi-bgmt2kuix.brevlab.com";
+//const endpoint = "https://fastapi-bgmt2kuix.brevlab.com";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
@@ -205,7 +205,7 @@ const FileUpload = () => {
       formData.append("image_file", file);
 
       try {
-        const response = await fetch(endpoint + "/image-channels/", {
+        const response = await fetch(endpoint + "/image_channels/", {
           method: "POST",
           body: formData,
         });
