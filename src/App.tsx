@@ -22,54 +22,58 @@ function App() {
       <main className="container mx-auto p-8 flex">
         {/* Guidelines Column */}
         <aside className="quickstart-guide w-1/4 mr-8">
-            <div className="quickstart-guide bg-gray-200 rounded-lg p-6 border border-gray-400 shadow-lg">
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                Quickstart
-                <span className="text-sm text-gray-600 ml-2">
-                  (hover on images!)
-                </span>
-              </h3>
+          <div className="quickstart-guide bg-gray-200 rounded-lg p-6 border border-gray-400 shadow-lg">
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">
+              Quickstart
+              <span className="text-sm text-gray-600 ml-2">
+                (hover on images!)
+              </span>
+            </h3>
 
-              <ul className="space-y-4 text-gray-700">
-                <li>
-                  Upload an image in <b>channel-last</b> format (less than 1024 pixels) and select whether each image channel is nuclear,
-                  wholecell, or blank. 
-                  <div className="mt-2">
-                    <HoverableGif
-                      staticImage={usageDropdownStaticImage}
-                      animatedGif={usageDropdownAnimatedGif}
-                    />
-                  </div>
-                </li>
-                <li>
-                  Generate bounding box prompts by clicking <b>Find Boxes</b>.
-                  Delete boxes by selecting them and pressing delete. Hold <b>Shift</b> and drag to add a box. <b>Scroll</b> to zoom in
-                  and out.
-                  <div className="mt-2">
-                    <HoverableGif
-                      staticImage={boxStaticImage}
-                      animatedGif={boxAnimatedGif}
-                    />
-                  </div>
-                </li>
-                <li>
-                  Once satisfied with the boxes, click  
-                  <b> Compute Mask</b> to generate segmentation masks.
-                  The computed mask is available for download as a{" "}
-                  <code>.tiff</code> file.
-                </li>
-              </ul>
+            <ul className="space-y-4 text-gray-700">
+              <li>
+                Upload an image in <b>channel-last</b> format (less than 1024
+                pixels) and select whether each image channel is nuclear,
+                wholecell, or blank.
+                <div className="mt-2">
+                  <HoverableGif
+                    staticImage={usageDropdownStaticImage}
+                    animatedGif={usageDropdownAnimatedGif}
+                  />
+                </div>
+              </li>
+              <li>
+                Generate bounding box prompts by clicking <b>Find Boxes</b>.
+                Delete boxes by selecting them and pressing delete. Hold{" "}
+                <b>Shift</b> and drag to add a box. <b>Scroll</b> to zoom in and
+                out.
+                <div className="mt-2">
+                  <HoverableGif
+                    staticImage={boxStaticImage}
+                    animatedGif={boxAnimatedGif}
+                  />
+                </div>
+              </li>
+              <li>
+                Once satisfied with the boxes, click
+                <b> Compute Mask</b> to generate segmentation masks. The
+                computed mask is available for download as a <code>.tiff</code>{" "}
+                file.
+              </li>
+            </ul>
+            <div className="flex justify-center items-center h-[desired height]">
               <button
                 onClick={() => setShowGallery(true)}
                 className="mt-6 py-2 px-4 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 transition-colors"
               >
                 View Sample Data
               </button>
-
-              <div className="high-zindex">
-                <GalleryModal show={showGallery} setShow={setShowGallery} />
-              </div>
             </div>
+
+            <div className="high-zindex">
+              <GalleryModal show={showGallery} setShow={setShowGallery} />
+            </div>
+          </div>
         </aside>
 
         {/* Main Column */}
