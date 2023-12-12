@@ -8,23 +8,24 @@ export default function Header() {
         aria-label="Global"
       >
         <div>
-          <a
-            href="https://vanvalen.caltech.edu/"
-            className="text-lg font-semibold text-white hover:text-white-700 transition duration-300 ease-in-out"
-          >
-            Van Valen Lab
-          </a>
+          <h1 className="text-xl md:text-2xl font-bold text-white">CellSAM</h1>
         </div>
         <div className="flex gap-x-8">
           <a
+            href="https://vanvalen.caltech.edu/"
+            className="text-lg font-semibold text-white hover:text-gray-300 transition duration-300 ease-in-out"
+          >
+            Van Valen Lab
+          </a>
+          <a
             href="https://github.com/vanvalenlab/"
-            className="text-lg font-semibold text-white hover:text-white-700 transition duration-300 ease-in-out"
+            className="text-lg font-semibold text-white hover:text-gray-300 transition duration-300 ease-in-out"
           >
             GitHub
           </a>
           <a
             href="https://deepcell.org"
-            className="text-lg font-semibold text-white hover:text-white-700 transition duration-300 ease-in-out"
+            className="text-lg font-semibold text-white hover:text-gray-300 transition duration-300 ease-in-out"
           >
             DeepCell
           </a>
