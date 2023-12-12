@@ -275,6 +275,7 @@ const FileUpload = () => {
             bboxFile.async("string").then((bboxString) => {
               const bboxJson = JSON.parse(bboxString);
               setBoundingBoxes(bboxJson);
+              handleCheckboxChange();
             });
           }
         });
