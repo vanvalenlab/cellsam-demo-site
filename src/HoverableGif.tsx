@@ -6,40 +6,41 @@ interface HoverableGifProps {
   duration?: number; // Duration for one loop of the GIF
 }
 
-function HoverableGif({ staticImage, animatedGif, duration = 3000 }: HoverableGifProps) {
+function HoverableGif({ staticImage, animatedGif, duration = 20000 }: HoverableGifProps) {
   const [imageSrc, setImageSrc] = useState<string>(animatedGif);
   const [playCount, setPlayCount] = useState<number>(0);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
 
-    if (playCount < 4) {
-      // Set a timer to switch back to the animated GIF after one loop
+    if (playCount < 3) {
+      // Set a timer to switch back to the static image after one loop
       timer = setTimeout(() => {
-        setImageSrc(playCount < 2 ? animatedGif : staticImage); // Play the GIF 3 times
-        setPlayCount(playCount + 1);
+        setImageSrc(staticImage);
       }, duration);
     }
 
     return () => clearTimeout(timer);
-  }, [playCount, duration]);
+  }, [playCount, duration, staticImage]);
+
+  useEffect(() => {
+    if (playCount < 3) {
+      // Increment play count and set the animated GIF
+      setPlayCount(playCount + 1);
+      setImageSrc(animatedGif);
+    }
+  }, []);
 
   const handleMouseEnter = () => {
-    // On hover, restart the play count and show the animated GIF
-    if (playCount >= 4) {
-      setPlayCount(0);
+    // On hover, show the animated GIF if play count is less than 3
+    if (playCount < 3) {
       setImageSrc(animatedGif);
     }
   };
 
   const handleMouseLeave = () => {
-    // If the GIF has played less than 3 times, continue playing
-    if (playCount < 4) {
-      setImageSrc(animatedGif);
-    } else {
-      // If the GIF has played 3 times, show static image
-      setImageSrc(staticImage);
-    }
+    // On mouse leave, switch back to the static image
+    setImageSrc(staticImage);
   };
 
   return (
