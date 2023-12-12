@@ -4,13 +4,13 @@ import Header from "./Header";
 import GalleryModal from "./GalleryModal";
 import HoverableGif from "./HoverableGif";
 
-import usageStaticImage from './assets/usage.png';
-import usageAnimatedGif from './assets/usage_fast.gif';
-import usageDropdownStaticImage from './assets/usage_dropdown.png';
-import usageDropdownAnimatedGif from './assets/usage_dropdown_fast.gif';
+import usageStaticImage from "./assets/usage.png";
+import usageAnimatedGif from "./assets/usage_fast.gif";
+import usageDropdownStaticImage from "./assets/usage_dropdown.png";
+import usageDropdownAnimatedGif from "./assets/usage_dropdown_fast.gif";
 
-import boxStaticImage from './assets/boxes.png';
-import boxAnimatedGif from './assets/boxes_fast.gif';
+import boxStaticImage from "./assets/boxes.png";
+import boxAnimatedGif from "./assets/boxes_fast.gif";
 
 function App() {
   const [showGallery, setShowGallery] = useState(false);
@@ -21,52 +21,55 @@ function App() {
 
       <main className="container mx-auto p-8 flex">
         {/* Guidelines Column */}
-        <aside className="w-1/3 mr-8">
-          <div className="bg-gray-200 rounded-lg p-6 border border-gray-400 shadow-lg">
-            <h3 className="text-2xl font-bold text-gray-800 mb-6">
-              Quickstart
-              <span className="text-sm text-gray-600 ml-2">(Hover to play!)</span>
-            </h3>
+        <aside className="quickstart-guide w-1/4 mr-8">
+            <div className="quickstart-guide bg-gray-200 rounded-lg p-6 border border-gray-400 shadow-lg">
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                Quickstart
+                <span className="text-sm text-gray-600 ml-2">
+                  (Hover to play!)
+                </span>
+              </h3>
 
-            <ul className="space-y-4 text-gray-700">
-              <li>
-                Images should be in <b>channel-last</b> format and be less than 1024 pixels along each axis.
-              </li>
-              <li>
-                After uploading, select whether each image channel is nuclear, wholecell, or blank.
-                <div className="mt-2">
-                  <HoverableGif staticImage={usageDropdownStaticImage} animatedGif={usageDropdownAnimatedGif}/>
-                </div>
-              </li>
-              <li>
-                Generate bounding box prompts by clicking <b>Find Boxes</b>. Delete boxes by selecting them and pressing delete. Add a box by holding <b>Shift</b> and dragging. <b>Scroll</b> to zoom in and out.
-                <div className="mt-2">
-                  <HoverableGif staticImage={boxStaticImage} animatedGif={boxAnimatedGif}/>
-                </div>
-              </li>
-              <li>
-                Once you're satisfied with the boxes, click on the <b>Compute Mask</b> button to generate a mask for each box. The computed mask is available for download as a <code>.tiff</code> file.
-              </li>
-              <li>
-                Click <b>Clear</b> once to remove all boxes and masks. Click <b>Clear</b> twice to remove the uploaded image.
-              </li>
-              <li>
-                Other formats or channel configurations will throw an error.
-              </li>
-            </ul>
-            <button
-              onClick={() => setShowGallery(true)}
-              className="mt-6 py-2 px-4 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 transition-colors"
-            >
-              View Sample Data
-            </button>
-            
+              <ul className="space-y-4 text-gray-700">
+                <li>
+                  Upload an image in <b>channel-last</b> format (less than 1024 pixels) and select whether each image channel is nuclear,
+                  wholecell, or blank. 
+                  <div className="mt-2">
+                    <HoverableGif
+                      staticImage={usageDropdownStaticImage}
+                      animatedGif={usageDropdownAnimatedGif}
+                    />
+                  </div>
+                </li>
+                <li>
+                  Generate bounding box prompts by clicking <b>Find Boxes</b>.
+                  Delete boxes by selecting them and pressing delete. Hold <b>Shift</b> and drag to add a box. <b>Scroll</b> to zoom in
+                  and out.
+                  <div className="mt-2">
+                    <HoverableGif
+                      staticImage={boxStaticImage}
+                      animatedGif={boxAnimatedGif}
+                    />
+                  </div>
+                </li>
+                <li>
+                  Once satisfied with the boxes, click  
+                  <b> Compute Mask</b> to generate segmentation masks.
+                  The computed mask is available for download as a{" "}
+                  <code>.tiff</code> file.
+                </li>
+              </ul>
+              <button
+                onClick={() => setShowGallery(true)}
+                className="mt-6 py-2 px-4 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 transition-colors"
+              >
+                View Sample Data
+              </button>
 
-            <div className='high-zindex'>
-              <GalleryModal show={showGallery} setShow={setShowGallery} />
+              <div className="high-zindex">
+                <GalleryModal show={showGallery} setShow={setShowGallery} />
+              </div>
             </div>
-
-          </div>
         </aside>
 
         {/* Main Column */}

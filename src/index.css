@@ -20,6 +20,8 @@ code {
     monospace;
 }
 
+
+
 .download-button-container {
   text-align: center;
   margin-top: 20px;
@@ -237,5 +239,14 @@ code {
 
 
 /* You might also want to add specific styles for different channel types if needed */
+.quickstart-guide {
+  font-size: 14px; /* Smaller font size */
+}
 
-/* Existing styles... */
+.quickstart-guide h3, .quickstart-guide h4 {
+  font-size: 18px; /* Adjust heading sizes accordingly */
+}
+
+.quickstart-guide p {
+  font-size: 14px; /* Ensure paragraph text is also smaller */
+}
