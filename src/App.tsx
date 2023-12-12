@@ -22,6 +22,7 @@ function App() {
           <div className="bg-gray-200 rounded-lg p-6 border border-gray-400 shadow-lg">
             <h3 className="text-2xl font-bold text-gray-800 mb-6">
               Quickstart
+              <span className="text-sm text-gray-600 ml-2">(Hover to play!)</span>
             </h3>
 
             <ul className="space-y-4 text-gray-700">
@@ -35,7 +36,7 @@ function App() {
                 </div>
               </li>
               <li>
-                Generate bounding box prompts by clicking Find Boxes. Delete boxes by selecting them and pressing delete. Add a box by holding Shift and dragging.
+                Generate bounding box prompts by clicking Find Boxes. Delete boxes by selecting them and pressing delete. Add a box by holding Shift and dragging. Scroll to Zoom in and out.
                 <div className="mt-2">
                   <HoverableGif staticImage={boxStaticImage} animatedGif={boxAnimatedGif}/>
                 </div>
