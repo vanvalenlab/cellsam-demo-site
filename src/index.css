@@ -98,7 +98,7 @@ code {
 }
 
 .text-white {
-  color: black; /* White text */
+  color: white; /* White text */
 }
 
 .text-white:hover, .text-white-700:hover {

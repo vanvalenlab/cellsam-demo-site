@@ -26,7 +26,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({ show, setShow }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-8 rounded" ref={modalRef}>
         <h3 className="text-xl font-bold text-gray-800 mb-4">Download Sample Data</h3>
         <Gallery />
