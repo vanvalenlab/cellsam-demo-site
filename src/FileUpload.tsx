@@ -13,6 +13,8 @@ import ImageCanvas, { BoundingBox } from "./ImageCanvas"; // Import ImageCanvas 
 
 // ... other necessary imports ...
 const endpoint = "http://131.215.2.187:8000";
+// Use this endpoint
+/*"https://fastapi-bgmt2kuix.brevlab.com",*/
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
@@ -242,7 +244,6 @@ const FileUpload = () => {
       updateFormData(formData);
 
       const response = await fetch(
-        /*"https://fastapi-bgmt2kuix.brevlab.com/process_image/",*/
         endpoint + "/embed_image/",
         {
           method: "POST",
@@ -451,6 +452,10 @@ const FileUpload = () => {
 
           <>
             <div className="flex flex-row justify-center items-center">
+
+            <button onClick={clearState} className="button-base clear-button">
+                Clear
+              </button>
               <button
                 onClick={handleCheckboxChange}
                 className="button-base toggle-button"
@@ -458,9 +463,6 @@ const FileUpload = () => {
                 {showBoundingBoxes ? "Hide Boxes" : "Show Boxes"}
               </button>
 
-              <button onClick={clearState} className="button-base clear-button">
-                Clear
-              </button>
 
               <button
                 onClick={embedImage}
