@@ -34,7 +34,7 @@ function App() {
               <li>
                 Upload an image in <b>channel-last</b> format (less than 1024
                 pixels) and select whether each image channel is nuclear,
-                wholecell, or blank.
+                wholecell, or blank (images are RGB, grayscale, or RGBA).
                 <div className="mt-2">
                   <HoverableGif
                     staticImage={usageDropdownStaticImage}
