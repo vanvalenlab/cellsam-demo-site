@@ -156,6 +156,11 @@ code {
   cursor: not-allowed;
 }
 
+.high-zindex {
+  z-index: 100;
+  position: relative; /* or absolute/fixed as per your requirement */
+}
+
 /* Existing CSS ... */
 
 /* Channel Button Styles */

@@ -62,7 +62,9 @@ function App() {
             </button>
             
 
-            <GalleryModal show={showGallery} setShow={setShowGallery} />
+            <div className='high-zindex'>
+              <GalleryModal show={showGallery} setShow={setShowGallery} />
+            </div>
 
           </div>
         </aside>

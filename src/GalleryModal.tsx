@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, MouseEvent } from 'react';
-import Gallery from './Gallery';
+import React, { useRef, useEffect, MouseEvent } from "react";
+import Gallery from "./Gallery";
 
 interface GalleryModalProps {
   show: boolean;
@@ -16,8 +16,8 @@ const GalleryModal: React.FC<GalleryModalProps> = ({ show, setShow }) => {
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', closeModal as any);
-    return () => document.removeEventListener('mousedown', closeModal as any);
+    document.addEventListener("mousedown", closeModal as any);
+    return () => document.removeEventListener("mousedown", closeModal as any);
   }, []);
 
   // Only render the modal if 'show' is true
@@ -28,11 +28,16 @@ const GalleryModal: React.FC<GalleryModalProps> = ({ show, setShow }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-8 rounded" ref={modalRef}>
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Click to download!</h3>
+        <h3 className="text-xl font-bold text-gray-800 mb-4">
+          Click to download!
+        </h3>
         <Gallery />
-        <button onClick={() => setShow(false)} className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+        <button
+          onClick={() => setShow(false)}
+          className="mt-4 bg-red-500 hover:bg-red-800 text-white font-bold py-2 px-4 rounded"
+        >
           Close
-          </button>
+        </button>
       </div>
     </div>
   );
