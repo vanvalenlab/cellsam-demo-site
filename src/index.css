@@ -240,7 +240,7 @@ code {
 
 /* You might also want to add specific styles for different channel types if needed */
 .quickstart-guide {
-  font-size: 14px; /* Smaller font size */
+  font-size: 15px; /* Smaller font size */
   position: sticky;
   top: 50px;
   z-index: 10;
