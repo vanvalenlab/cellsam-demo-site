@@ -13,9 +13,9 @@ import ImageCanvas, { BoundingBox } from "./ImageCanvas"; // Import ImageCanvas 
 import DeepCellButton from "./DeepCellButton";
 
 // ... other necessary imports ...
-const endpoint = "http://131.215.2.187:8000";
+// const endpoint = "http://131.215.2.187:8000";
 // Use this endpoint
-//const endpoint = "https://fastapi-bgmt2kuix.brevlab.com";
+const endpoint = "https://fastapi-bgmt2kuix.brevlab.com";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
