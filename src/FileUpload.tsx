@@ -153,8 +153,6 @@ const FileUpload = () => {
 
   const [channelSelections, setChannelSelections] = useState<ChannelType[]>([]);
 
-  const [imageBlobName, setImageBlobName] = useState<string | null>(null);
-  const [maskBlobName, setMaskBlobName] = useState<string | null>(null);
 
   // handling channel stuff
 
@@ -470,7 +468,7 @@ const FileUpload = () => {
           type="file"
           id="fileElem"
           multiple
-          accept="image/*"
+          accept="image/*, image/tiff"
           className="hidden"
           ref={fileInputRef} // Add this line
           onChange={(e) => {
