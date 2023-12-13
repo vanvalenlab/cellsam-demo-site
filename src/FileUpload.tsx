@@ -232,7 +232,7 @@ const FileUpload = () => {
         }
       } catch (error) {
         setErrorMessage(
-          "Error processing image. You may have an invalid format."
+          `Error processing image. You may have an invalid format. ${error}`
         ); // Display error message
         clearState();
       } finally {
