@@ -186,6 +186,7 @@ const FileUpload = () => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
+  
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -193,7 +194,6 @@ const FileUpload = () => {
     let files = e.dataTransfer.files;
     handleFiles(files);
   }, []);
-
 
   const handleFiles = useCallback(
     async (files: FileList) => {
