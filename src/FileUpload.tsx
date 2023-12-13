@@ -194,6 +194,7 @@ const FileUpload = () => {
     handleFiles(files);
   }, []);
 
+
   const handleFiles = useCallback(
     async (files: FileList) => {
       const file = files[0];
@@ -232,7 +233,7 @@ const FileUpload = () => {
         }
       } catch (error) {
         setErrorMessage(
-          `Error processing image. You may have an invalid format. ${error}`
+          "Error processing image. You may have an invalid format."
         ); // Display error message
         clearState();
       } finally {
