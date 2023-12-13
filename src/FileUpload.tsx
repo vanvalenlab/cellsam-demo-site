@@ -361,6 +361,7 @@ const FileUpload = () => {
       setBoundingBoxes([]);
       setSegmentationMask(null);
       setOverlayMask(null);
+      setMaskFileObject(null);
     } else {
       // If there are no bounding boxes or masks, clear the image
       setUploadedImageFile(null);
@@ -368,6 +369,7 @@ const FileUpload = () => {
       setOverlayMask(null);
       setSegmentationMask(null);
       setChannelSelections([]);
+      setMaskFileObject(null);
 
       // Reset the file input
       if (fileInputRef.current) {
@@ -557,8 +559,8 @@ const FileUpload = () => {
               </button>
               <button
                 onClick={uploadFilesToDCL}
-                className="button-base process-image-button"
-                disabled={isLoading && !uploadedImageFile && !maskFileObject}
+                className="button-base dcl-upload-button"
+                disabled={isLoading || (!maskFileObject)}
               >
                 Open in DCL
               </button>
