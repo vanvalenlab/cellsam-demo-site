@@ -10,12 +10,13 @@ import React, {
 import JSZip from "jszip";
 import Notification from "./Notification";
 import ImageCanvas, { BoundingBox } from "./ImageCanvas"; // Import ImageCanvas and BoundingBox type
-import DeepCellButton from "./DeepCellButton";
+
+import axios from "axios";
 
 // ... other necessary imports ...
-// const endpoint = "http://131.215.2.187:8000";
+const endpoint = "http://131.215.2.187:8000";
 // Use this endpoint
-const endpoint = "https://fastapi-bgmt2kuix.brevlab.com";
+//const endpoint = "https://fastapi-bgmt2kuix.brevlab.com";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
@@ -146,8 +147,14 @@ const FileUpload = () => {
   const [segmentationMask, setSegmentationMask] = useState<string | null>(null);
   // In FileUpload component
   const [showBoundingBoxes, setShowBoundingBoxes] = useState(true);
+  const [maskFileObject, setMaskFileObject] = useState<File | Blob | null>(
+    null
+  );
 
   const [channelSelections, setChannelSelections] = useState<ChannelType[]>([]);
+
+  const [imageBlobName, setImageBlobName] = useState<string | null>(null);
+  const [maskBlobName, setMaskBlobName] = useState<string | null>(null);
 
   // handling channel stuff
 
@@ -328,6 +335,7 @@ const FileUpload = () => {
             if (maskData) {
               maskData.async("blob").then((maskBlob) => {
                 const maskUrl = URL.createObjectURL(maskBlob);
+                setMaskFileObject(maskBlob);
                 setOverlayMask(maskUrl);
               });
             }
@@ -366,6 +374,58 @@ const FileUpload = () => {
         fileInputRef.current.value = "";
       }
     }
+  };
+
+  const uploadFilesToDCL = async () => {
+    if (!uploadedImageFile || !maskFileObject) return;
+
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+
+      formData.append("image_file", uploadedImageFile); // append the file directly, not as a binary string
+      formData.append("mask_file", maskFileObject);
+
+      const response = await fetch(endpoint + "/upload_files/", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const imageBlobName = data.image_blob_name;
+        const maskBlobName = data.mask_blob_name;
+
+        var formDataDCL = new FormData();
+        formDataDCL.append("images", imageBlobName);
+        formDataDCL.append("labels", maskBlobName);
+        formDataDCL.append("axes", "YXC");
+
+        const baseUrl = "https://label.deepcell.org";
+        axios({
+          method: "post",
+          url: baseUrl + "/api/project",
+          data: formDataDCL,
+          headers: { "Content-Type": "multipart/form-data" },
+        })
+          .then((res) => {
+            // Open the response URL in a new tab/window
+            console.log(res.data);
+            window.open(`${baseUrl}/project?projectId=${res.data}`, "_blank");
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      } else {
+        const errorText = await response.text();
+        console.error("Error passing data to DeepCell.", errorText);
+        setErrorMessage(errorText);
+      }
+    } catch (error) {
+      setErrorMessage(`Error passing data to DeepCell: ${error}`);
+    }
+
+    setIsLoading(false);
   };
 
   const clearBoundingBoxes = () => {
@@ -495,12 +555,13 @@ const FileUpload = () => {
               >
                 Compute Mask
               </button>
-              <DeepCellButton
-                myUrl="https://label.deepcell.org"
-                uploadedImage={uploadedImageFile} // Assuming this is your state for the uploaded image
-                maskFile={overlayMask} // You should have a similar state or logic to get the mask file
-                axes="BYXC"
-              />
+              <button
+                onClick={uploadFilesToDCL}
+                className="button-base process-image-button"
+                disabled={isLoading && !uploadedImageFile && !maskFileObject}
+              >
+                Open in DCL
+              </button>
             </div>
           </>
         </>
