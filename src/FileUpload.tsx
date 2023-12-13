@@ -295,6 +295,7 @@ const FileUpload = () => {
       console.error("Error processing image:", error);
       setErrorMessage(`Error processing image: ${error}`);
     }
+    setShowBoundingBoxes(true);
     setIsLoading(false);
   };
 
@@ -529,7 +530,7 @@ const FileUpload = () => {
           </div>
 
           <>
-            <div className="flex flex-row justify-center items-center">
+            <div className="flex flex-row justify-center items-center" style={{marginTop: "20px"}} >
               <button onClick={clearState} className="button-base clear-button">
                 Clear
               </button>
