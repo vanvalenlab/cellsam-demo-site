@@ -153,7 +153,6 @@ const FileUpload = () => {
 
   const [channelSelections, setChannelSelections] = useState<ChannelType[]>([]);
 
-
   // handling channel stuff
 
   const setChannelType = (channelIndex: number, type: ChannelType) => {
@@ -184,7 +183,7 @@ const FileUpload = () => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
-  
+
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -559,7 +558,7 @@ const FileUpload = () => {
               <button
                 onClick={uploadFilesToDCL}
                 className="button-base dcl-upload-button"
-                disabled={isLoading || (!maskFileObject)}
+                disabled={isLoading || !maskFileObject}
               >
                 Open in DCL
               </button>
