@@ -107,21 +107,63 @@ code {
   color: #2196F3; /* Lighter blue for hover effect, adjust as needed */
 }
 
+/* Custom Styles for Buttons */
+
+/* Base style for all buttons */
 .button-base {
-  padding: 8px 20px; /* Consistent padding */
-  border-radius: 4px; /* Rounded corners */
-  text-align: center;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 8px; /* Space between buttons */
-  margin-bottom: 8px;
-  margin-top: 20px;
-  transition: background-color 0.3s; /* Smooth transition for hover effect */
+  padding: 10px 15px; /* Comfortable padding */
+  border: none; /* No border */
+  border-radius: 5px; /* Rounded corners */
+  font-weight: bold; /* Bold font */
+  font-size: 1rem; /* Readable font size */
+  cursor: pointer; /* Cursor change to indicate clickable */
+  transition: background-color 0.2s, transform 0.2s; /* Smooth transitions for interactions */
+  margin: 5px; /* Spacing around buttons */
+  display: inline-block; /* Ensuring proper display */
+  text-align: center; /* Centering text */
+  color: white; /* Default text color */
 }
+
+/* Hover and Active Styles */
+.button-base:hover {
+  transform: scale(1.05); /* Slightly enlarge on hover */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+}
+
+.button-base:active {
+  transform: scale(0.95); /* Slight shrink effect on click */
+}
+
+/* Specific styles for each button type */
+.clear-button {
+  background-color: #f44336; /* Reddish tone for clear action */
+}
+
+.toggle-button {
+  background-color: #ff9800; /* Orange for toggling action */
+}
+
+.find-boxes-button {
+  background-color: #4caf50; /* Green for positive action */
+}
+
+.process-image-button {
+  background-color: #2196f3; /* Blue for process action */
+}
+
+.dcl-upload-button {
+  background-color: #9c27b0; /* Purple for special action */
+}
+
+/* Style for disabled state */
+.button-base:disabled {
+  background-color: #bdbdbd; /* Grayed out */
+  color: #757575; /* Darker text */
+  cursor: not-allowed; /* Change cursor to indicate disabled state */
+  transform: none; /* No transform on hover */
+  box-shadow: none; /* No shadow */
+}
+
 
 /* General hover effect for all buttons */
 .button-base:hover {
