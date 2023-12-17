@@ -89,7 +89,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 
   useEffect(() => {
     drawBoxes();
-  }, [boundingBoxes, selectedBoxIndex, hoveredBoxIndex]);
+  }, [boundingBoxes, selectedBoxIndex, hoveredBoxIndex, showBoundingBoxes]);
 
   const drawImage = () => {
     const image = imageRef.current;
