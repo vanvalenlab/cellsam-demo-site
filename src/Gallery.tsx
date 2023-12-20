@@ -1,5 +1,10 @@
 import React from "react";
 
+// Define the props interface
+interface GalleryProps {
+  onImageClick: (imageSrc: string) => void; // Type for the onImageClick function
+}
+
 const images = [
   { src: "tissuenet.png", alt: "TissueNet", download: "tissuenet.png" },
   { src: "ep_micro.png", alt: "Phase microscopy", download: "ep_micro.png" },
@@ -7,21 +12,18 @@ const images = [
   { src: "YeastNet.png", alt: "YeastNet", download: "YeastNet.png" },
   // Add more images as needed
 ];
-
-function Gallery() {
+const Gallery: React.FC<GalleryProps> = ({ onImageClick }) => {
   return (
     <section className="sample-data-section">
-      {/* <h2 className="section-title">Download Sample Data</h2> */}
       <div className="gallery">
         {images.map((image, index) => (
-          <a
+          <div
             key={index}
-            href={image.download}
-            download
             className="gallery-item"
+            onClick={() => onImageClick(image.src)}
           >
             <img src={image.src} alt={image.alt} className="gallery-image" />
-          </a>
+          </div>
         ))}
       </div>
     </section>

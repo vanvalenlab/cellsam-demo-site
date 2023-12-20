@@ -10,11 +10,12 @@ import React, {
 import JSZip from "jszip";
 import Notification from "./Notification";
 import ImageCanvas, { BoundingBox } from "./ImageCanvas"; // Import ImageCanvas and BoundingBox type
+import LoadGalleryModal from "./LoadGalleryModal";
 
 import axios from "axios";
 
 // ... other necessary imports ...
-const endpoint = "http://131.215.2.187:8000";
+const endpoint = "http://131.215.2.187:8002";
 // Use this endpoint
 //const endpoint = "https://fastapi-bgmt2kuix.brevlab.com";
 
@@ -150,8 +151,25 @@ const FileUpload = () => {
   const [maskFileObject, setMaskFileObject] = useState<File | Blob | null>(
     null
   );
-
+  const [showGalleryModal, setShowGalleryModal] = useState(false);
   const [channelSelections, setChannelSelections] = useState<ChannelType[]>([]);
+
+  const handleImageSelection = async (imageSrc: string) => {
+    try {
+      const response = await fetch(imageSrc);
+      const imageBlob = await response.blob();
+  
+      // Create a file from the blob
+      const imageFile = new File([imageBlob], "selectedImage.png", { type: imageBlob.type });
+  
+      setUploadedImageFile(imageFile);
+      setShowGalleryModal(false); // Close the gallery modal
+    } catch (error) {
+      console.error('Error fetching selected image:', error);
+      // Handle the error appropriately
+    }
+  };
+  
 
   // handling channel stuff
 
@@ -483,6 +501,19 @@ const FileUpload = () => {
           <p className="text-lg font-semibold">Upload file</p>
         </label>
       </div>
+      <button
+        className="button-base gallery-button"
+        onClick={() => setShowGalleryModal(true)}
+      >
+        Open Gallery
+      </button>
+
+      {/* GalleryModal component */}
+      <LoadGalleryModal
+        show={showGalleryModal}
+        setShow={setShowGalleryModal}
+        onImageSelect={handleImageSelection} // Pass the handler function
+      />
       <div className="channel-selection">
         {channelSelections.map((type, index) => (
           <ChannelSelectionDropdown
@@ -568,6 +599,7 @@ const FileUpload = () => {
         </>
       )}
     </div>
+    
   );
 };
 
