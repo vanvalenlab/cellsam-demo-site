@@ -1,20 +1,19 @@
 import React, {
   useCallback,
   useState,
-  useEffect,
   useRef,
-  CSSProperties,
-  DragEvent,
-  ChangeEvent,
 } from "react";
 import JSZip from "jszip";
 import Notification from "./Notification";
 import ImageCanvas, { BoundingBox } from "./ImageCanvas"; // Import ImageCanvas and BoundingBox type
+import LoadGalleryModal from "./LoadGalleryModal";
+
+import axios from "axios";
 
 // ... other necessary imports ...
-//const endpoint = "http://131.215.2.187:8002";
+const endpoint = "http://131.215.2.187:8002";
 // Use this endpoint
-const endpoint = "https://fastapi-bgmt2kuix.brevlab.com";
+//const endpoint = "https://fastapi-bgmt2kuix.brevlab.com";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
@@ -145,8 +144,37 @@ const FileUpload = () => {
   const [segmentationMask, setSegmentationMask] = useState<string | null>(null);
   // In FileUpload component
   const [showBoundingBoxes, setShowBoundingBoxes] = useState(true);
-
+  const [maskFileObject, setMaskFileObject] = useState<File | Blob | null>(
+    null
+  );
+  const [showGalleryModal, setShowGalleryModal] = useState(false);
   const [channelSelections, setChannelSelections] = useState<ChannelType[]>([]);
+
+  const handleImageSelection = async (imageSrc: string) => {
+    try {
+      const response = await fetch(imageSrc);
+      const imageBlob = await response.blob();
+  
+      // Create a file from the blob
+      const imageFile = new File([imageBlob], "selectedImage.png", { type: imageBlob.type });
+  
+      // Simulate a FileList object
+      const simulatedFileList = {
+        0: imageFile,
+        length: 1,
+        item: (index: number) => imageFile
+      } as unknown as FileList; // Type assertion here LOL
+  
+      // Use the handleFiles function
+      setShowGalleryModal(false);
+      handleFiles(simulatedFileList);
+    } catch (error) {
+      console.error('Error fetching selected image:', error);
+      // Handle the error appropriately
+    }
+  };
+  
+  
 
   // handling channel stuff
 
@@ -178,6 +206,7 @@ const FileUpload = () => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
+
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -193,6 +222,8 @@ const FileUpload = () => {
       setOverlayMask(null);
       setIsLoading(true); // Set loading to true while processing
       setErrorMessage(null);
+      setSegmentationMask(null);
+      setBoundingBoxes([]);
 
       if (uploadedImageFile) {
         URL.revokeObjectURL(URL.createObjectURL(uploadedImageFile));
@@ -289,6 +320,7 @@ const FileUpload = () => {
       console.error("Error processing image:", error);
       setErrorMessage(`Error processing image: ${error}`);
     }
+    setShowBoundingBoxes(true);
     setIsLoading(false);
   };
 
@@ -327,7 +359,9 @@ const FileUpload = () => {
             if (maskData) {
               maskData.async("blob").then((maskBlob) => {
                 const maskUrl = URL.createObjectURL(maskBlob);
+                setMaskFileObject(maskBlob);
                 setOverlayMask(maskUrl);
+                setShowBoundingBoxes(false);
               });
             }
           });
@@ -352,6 +386,7 @@ const FileUpload = () => {
       setBoundingBoxes([]);
       setSegmentationMask(null);
       setOverlayMask(null);
+      setMaskFileObject(null);
     } else {
       // If there are no bounding boxes or masks, clear the image
       setUploadedImageFile(null);
@@ -359,12 +394,65 @@ const FileUpload = () => {
       setOverlayMask(null);
       setSegmentationMask(null);
       setChannelSelections([]);
+      setMaskFileObject(null);
 
       // Reset the file input
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     }
+  };
+
+  const uploadFilesToDCL = async () => {
+    if (!uploadedImageFile || !maskFileObject) return;
+
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+
+      formData.append("image_file", uploadedImageFile); // append the file directly, not as a binary string
+      formData.append("mask_file", maskFileObject);
+
+      const response = await fetch(endpoint + "/upload_files/", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const imageBlobName = data.image_blob_name;
+        const maskBlobName = data.mask_blob_name;
+
+        var formDataDCL = new FormData();
+        formDataDCL.append("images", imageBlobName);
+        formDataDCL.append("labels", maskBlobName);
+        formDataDCL.append("axes", "YXC");
+
+        const baseUrl = "https://label.deepcell.org";
+        axios({
+          method: "post",
+          url: baseUrl + "/api/project",
+          data: formDataDCL,
+          headers: { "Content-Type": "multipart/form-data" },
+        })
+          .then((res) => {
+            // Open the response URL in a new tab/window
+            console.log(res.data);
+            window.open(`${baseUrl}/project?projectId=${res.data}`, "_blank");
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      } else {
+        const errorText = await response.text();
+        console.error("Error passing data to DeepCell.", errorText);
+        setErrorMessage(errorText);
+      }
+    } catch (error) {
+      setErrorMessage(`Error passing data to DeepCell: ${error}`);
+    }
+
+    setIsLoading(false);
   };
 
   const clearBoundingBoxes = () => {
@@ -386,41 +474,70 @@ const FileUpload = () => {
         />
       )}
 
-      <div
-        id="drop-area"
-        className={`mb-4 border-2 border-dashed ${
-          highlight ? "bg-blue-100" : ""
-        } p-4 text-center cursor-pointer`}
-        onDragEnter={handleDrag}
-        onDragOver={(e) => {
-          handleDrag(e);
-          setHighlight(true);
-        }}
-        onDragLeave={(e) => {
-          handleDrag(e);
-          setHighlight(false);
-        }}
-        onDrop={handleDrop}
-      >
-        <input
-          type="file"
-          id="fileElem"
-          multiple
-          accept="image/*"
-          className="hidden"
-          ref={fileInputRef} // Add this line
-          onChange={(e) => {
-            if (e.target.files) {
-              handleFiles(e.target.files);
-            }
-          }}
-        />
 
-        <label htmlFor="fileElem" className="cursor-pointer">
-          <p className="text-gray-700">Drag and drop or click to browse</p>
-          <p className="text-lg font-semibold">Upload file</p>
-        </label>
-      </div>
+
+<label htmlFor="fileElem" className="cursor-pointer">
+  <div
+    id="drop-area"
+    className={`mb-4 border-2 border-dotted border-gray-300 ${
+      highlight ? "bg-gray-100" : "bg-white"
+    } p-6 text-center hover:border-blue-500 hover:shadow-md transition-all duration-300`}
+    onDragEnter={handleDrag}
+    onDragOver={(e) => {
+      handleDrag(e);
+      setHighlight(true);
+    }}
+    onDragLeave={(e) => {
+      handleDrag(e);
+      setHighlight(false);
+    }}
+    onDrop={handleDrop}
+  >
+    <input
+      type="file"
+      id="fileElem"
+      multiple
+      accept="image/*, image/tiff"
+      className="hidden"
+      ref={fileInputRef}
+      onChange={(e) => {
+        if (e.target.files) {
+          handleFiles(e.target.files);
+        }
+      }}
+    />
+
+    <div className="flex flex-col items-center justify-center">
+      {/* <img src="upload_icon.svg" alt="Upload" className="h-8 w-8 mb-2" /> */}
+      <p className="text-xl font-light text-gray-800">Upload File</p>
+      <p className="text-sm text-gray-500 mt-2">Drag and drop, or click to browse</p>
+    </div>
+
+    <button
+      type="button"
+      className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-full shadow transition-transform duration-300 hover:-translate-y-1"
+      onClick={() => setShowGalleryModal(true)}
+    >
+      Open Gallery
+    </button>
+  </div>
+</label>
+
+
+
+
+
+
+
+
+
+
+      {/* GalleryModal component */}
+      <LoadGalleryModal
+        show={showGalleryModal}
+        setShow={setShowGalleryModal}
+        onImageSelect={handleImageSelection} // Pass the handler function
+      />
       <div className="channel-selection">
         {channelSelections.map((type, index) => (
           <ChannelSelectionDropdown
@@ -468,7 +585,10 @@ const FileUpload = () => {
           </div>
 
           <>
-            <div className="flex flex-row justify-center items-center">
+            <div
+              className="flex flex-row justify-center items-center"
+              style={{ marginTop: "20px" }}
+            >
               <button onClick={clearState} className="button-base clear-button">
                 Clear
               </button>
@@ -493,6 +613,13 @@ const FileUpload = () => {
                 disabled={isLoading}
               >
                 Compute Mask
+              </button>
+              <button
+                onClick={uploadFilesToDCL}
+                className="button-base dcl-upload-button"
+                disabled={isLoading || !maskFileObject}
+              >
+                Open in DCL
               </button>
             </div>
           </>

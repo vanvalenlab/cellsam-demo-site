@@ -89,7 +89,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
 
   useEffect(() => {
     drawBoxes();
-  }, [boundingBoxes, selectedBoxIndex, hoveredBoxIndex]);
+  }, [boundingBoxes, selectedBoxIndex, hoveredBoxIndex, showBoundingBoxes]);
 
   const drawImage = () => {
     const image = imageRef.current;
@@ -162,21 +162,23 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
           context.strokeStyle = "lightcoral"; // Color for hovered box
           context.shadowColor = "red";
           context.shadowBlur = 10;
+          context.lineWidth = 2;
         }
         // Set the style for the selected box
         else if (index === selectedBoxIndex) {
           context.strokeStyle = "red"; // Color for selected box
           context.shadowColor = "transparent";
           context.shadowBlur = 0;
+          context.lineWidth = 2;
         }
         // Style for non-hovered, non-selected boxes
         else {
           context.strokeStyle = "white";
           context.shadowColor = "transparent";
           context.shadowBlur = 0;
+          context.lineWidth = 1;
         }
 
-        context.lineWidth = 2;
         context.beginPath();
         context.rect(box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1);
         context.stroke();
