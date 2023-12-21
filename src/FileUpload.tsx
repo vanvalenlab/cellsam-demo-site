@@ -476,51 +476,53 @@ const FileUpload = () => {
         />
       )}
 
-      <div
-        id="drop-area"
-        className={`mb-4 border-2 border-dashed ${
-          highlight ? "bg-blue-100" : ""
-        } p-4 text-center cursor-pointer`}
-        onDragEnter={handleDrag}
-        onDragOver={(e) => {
-          handleDrag(e);
-          setHighlight(true);
-        }}
-        onDragLeave={(e) => {
-          handleDrag(e);
-          setHighlight(false);
-        }}
-        onDrop={handleDrop}
-      >
-        <input
-          type="file"
-          id="fileElem"
-          multiple
-          accept="image/*, image/tiff"
-          className="hidden"
-          ref={fileInputRef}
-          onChange={(e) => {
-            if (e.target.files) {
-              handleFiles(e.target.files);
-            }
-          }}
-        />
+<div
+  id="drop-area"
+  className={`mb-4 border-4 border-dashed ${
+    highlight ? "border-blue-300 bg-blue-50" : "border-gray-300 bg-white"
+  } p-6 text-center cursor-pointer rounded-lg transition-all duration-300 ease-in-out`}
+  onDragEnter={handleDrag}
+  onDragOver={(e) => {
+    handleDrag(e);
+    setHighlight(true);
+  }}
+  onDragLeave={(e) => {
+    handleDrag(e);
+    setHighlight(false);
+  }}
+  onDrop={handleDrop}
+>
+  <input
+    type="file"
+    id="fileElem"
+    multiple
+    accept="image/*, image/tiff"
+    className="hidden"
+    ref={fileInputRef}
+    onChange={(e) => {
+      if (e.target.files) {
+        handleFiles(e.target.files);
+      }
+    }}
+  />
 
-        <label htmlFor="fileElem" className="cursor-pointer">
-          <p className="text-gray-700">Drag and drop or click to browse</p>
-          <p className="text-lg font-semibold">Upload file</p>
-        </label>
+  <label htmlFor="fileElem" className="cursor-pointer flex flex-col items-center justify-center">
+    <svg className="w-10 h-10 text-gray-400 mb-2" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+      <path d="M7 8l5-5m0 0l5 5m-5-5v12"></path>
+      <path d="M20 21H4v-7m16 7v-7m0 0H4"></path>
+    </svg>
+    <p className="text-gray-600">Drag and drop or click to browse</p>
+    <p className="text-lg font-semibold text-blue-600">Upload file</p>
+  </label>
 
-        {/* Gallery button appears only when no image is uploaded */}
-        {
-          <button
-            className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
-            onClick={() => setShowGalleryModal(true)}
-          >
-            Open Gallery
-          </button>
-        }
-      </div>
+    <button
+      className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200 ease-in-out shadow-md"
+      onClick={() => setShowGalleryModal(true)}
+    >
+      Open Gallery
+    </button>
+</div>
+
 
       {/* GalleryModal component */}
       <LoadGalleryModal
