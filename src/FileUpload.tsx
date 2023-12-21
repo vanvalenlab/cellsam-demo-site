@@ -9,11 +9,14 @@ import ImageCanvas, { BoundingBox } from "./ImageCanvas"; // Import ImageCanvas 
 import LoadGalleryModal from "./LoadGalleryModal";
 
 import axios from "axios";
+import { walkUpBindingElementsAndPatterns } from "typescript";
 
+// 
 // ... other necessary imports ...
-const endpoint = "http://131.215.2.187:8002";
+// const endpoint = "http://131.215.2.187:8002";
 // Use this endpoint
-//const endpoint = "https://fastapi-bgmt2kuix.brevlab.com";
+// const endpoint = "https://fastapi-bgmt2kuix.brevlab.com";
+const endpoint = "https://8002-bgmt2kuix.brevlab.com"
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
@@ -249,13 +252,13 @@ const FileUpload = () => {
         } else {
           // Handle unknown or unsupported image formats
           setErrorMessage(
-            "Error processing image. You may have an invalid format."
+            "Error processing image, channels not found. You may have an invalid format." 
           ); // Display error message
           clearState();
         }
       } catch (error) {
         setErrorMessage(
-          "Error processing image. You may have an invalid format."
+          "Error processing image. You may have an invalid format. " + error
         ); // Display error message
         clearState();
       } finally {
