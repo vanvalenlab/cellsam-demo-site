@@ -31,7 +31,7 @@ const GalleryModal: React.FC<GalleryModalProps> = ({ show, setShow }) => {
         <h3 className="text-xl font-bold text-gray-800 mb-4">
           Click to download!
         </h3>
-        <Gallery onImageClick={() => null}/>
+        <Gallery downloadMode={true}/>
         <button
           onClick={() => setShow(false)}
           className="mt-4 bg-red-500 hover:bg-red-800 text-white font-bold py-2 px-4 rounded"

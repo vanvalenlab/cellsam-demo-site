@@ -162,13 +162,22 @@ const FileUpload = () => {
       // Create a file from the blob
       const imageFile = new File([imageBlob], "selectedImage.png", { type: imageBlob.type });
   
-      setUploadedImageFile(imageFile);
-      setShowGalleryModal(false); // Close the gallery modal
+      // Simulate a FileList object
+      const simulatedFileList = {
+        0: imageFile,
+        length: 1,
+        item: (index: number) => imageFile
+      } as unknown as FileList; // Type assertion here LOL
+  
+      // Use the handleFiles function
+      setShowGalleryModal(false);
+      handleFiles(simulatedFileList);
     } catch (error) {
       console.error('Error fetching selected image:', error);
       // Handle the error appropriately
     }
   };
+  
   
 
   // handling channel stuff
@@ -217,6 +226,7 @@ const FileUpload = () => {
       setOverlayMask(null);
       setIsLoading(true); // Set loading to true while processing
       setErrorMessage(null);
+      setSegmentationMask(null);
 
       if (uploadedImageFile) {
         URL.revokeObjectURL(URL.createObjectURL(uploadedImageFile));
@@ -488,7 +498,7 @@ const FileUpload = () => {
           multiple
           accept="image/*, image/tiff"
           className="hidden"
-          ref={fileInputRef} // Add this line
+          ref={fileInputRef}
           onChange={(e) => {
             if (e.target.files) {
               handleFiles(e.target.files);
@@ -500,13 +510,17 @@ const FileUpload = () => {
           <p className="text-gray-700">Drag and drop or click to browse</p>
           <p className="text-lg font-semibold">Upload file</p>
         </label>
+
+        {/* Gallery button appears only when no image is uploaded */}
+        {
+          <button
+            className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+            onClick={() => setShowGalleryModal(true)}
+          >
+            Open Gallery
+          </button>
+        }
       </div>
-      <button
-        className="button-base gallery-button"
-        onClick={() => setShowGalleryModal(true)}
-      >
-        Open Gallery
-      </button>
 
       {/* GalleryModal component */}
       <LoadGalleryModal
@@ -561,7 +575,10 @@ const FileUpload = () => {
           </div>
 
           <>
-            <div className="flex flex-row justify-center items-center" style={{marginTop: "20px"}} >
+            <div
+              className="flex flex-row justify-center items-center"
+              style={{ marginTop: "20px" }}
+            >
               <button onClick={clearState} className="button-base clear-button">
                 Clear
               </button>
@@ -599,7 +616,6 @@ const FileUpload = () => {
         </>
       )}
     </div>
-    
   );
 };
 

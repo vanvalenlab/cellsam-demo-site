@@ -28,6 +28,7 @@ const LoadGalleryModal: React.FC<LoadGalleryModalProps> = ({ show, setShow, onIm
   }
 
   return (
+    <div className="high-zindex">
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-8 rounded" ref={modalRef}>
         <h3 className="text-xl font-bold text-gray-800 mb-4">
@@ -42,6 +43,7 @@ const LoadGalleryModal: React.FC<LoadGalleryModalProps> = ({ show, setShow, onIm
         </button>
       </div>
     </div>
+</div>
   );
 };
 
