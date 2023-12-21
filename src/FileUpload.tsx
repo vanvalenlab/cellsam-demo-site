@@ -1,11 +1,7 @@
 import React, {
   useCallback,
   useState,
-  useEffect,
   useRef,
-  CSSProperties,
-  DragEvent,
-  ChangeEvent,
 } from "react";
 import JSZip from "jszip";
 import Notification from "./Notification";
@@ -365,6 +361,7 @@ const FileUpload = () => {
                 const maskUrl = URL.createObjectURL(maskBlob);
                 setMaskFileObject(maskBlob);
                 setOverlayMask(maskUrl);
+                setShowBoundingBoxes(false);
               });
             }
           });

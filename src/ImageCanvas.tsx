@@ -176,7 +176,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({
           context.shadowBlur = 0;
         }
 
-        context.lineWidth = 2;
+        context.lineWidth = 1.5;
         context.beginPath();
         context.rect(box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1);
         context.stroke();
