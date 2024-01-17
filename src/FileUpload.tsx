@@ -1,8 +1,4 @@
-import React, {
-  useCallback,
-  useState,
-  useRef,
-} from "react";
+import React, { useCallback, useState, useRef } from "react";
 import JSZip from "jszip";
 import Notification from "./Notification";
 import ImageCanvas, { BoundingBox } from "./ImageCanvas"; // Import ImageCanvas and BoundingBox type
@@ -11,12 +7,10 @@ import LoadGalleryModal from "./LoadGalleryModal";
 import axios from "axios";
 import { walkUpBindingElementsAndPatterns } from "typescript";
 
-// 
+//
 // ... other necessary imports ...
-// const endpoint = "http://131.215.2.187:8002";
 // Use this endpoint
-// const endpoint = "https://fastapi-bgmt2kuix.brevlab.com";
-const endpoint = "https://8002-bgmt2kuix.brevlab.com"
+const endpoint = "https://cellsam-bgmt2kuix.brevlab.com/";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
@@ -157,27 +151,27 @@ const FileUpload = () => {
     try {
       const response = await fetch(imageSrc);
       const imageBlob = await response.blob();
-  
+
       // Create a file from the blob
-      const imageFile = new File([imageBlob], "selectedImage.png", { type: imageBlob.type });
-  
+      const imageFile = new File([imageBlob], "selectedImage.png", {
+        type: imageBlob.type,
+      });
+
       // Simulate a FileList object
       const simulatedFileList = {
         0: imageFile,
         length: 1,
-        item: (index: number) => imageFile
+        item: (index: number) => imageFile,
       } as unknown as FileList; // Type assertion here LOL
-  
+
       // Use the handleFiles function
       setShowGalleryModal(false);
       handleFiles(simulatedFileList);
     } catch (error) {
-      console.error('Error fetching selected image:', error);
+      console.error("Error fetching selected image:", error);
       // Handle the error appropriately
     }
   };
-  
-  
 
   // handling channel stuff
 
@@ -252,7 +246,7 @@ const FileUpload = () => {
         } else {
           // Handle unknown or unsupported image formats
           setErrorMessage(
-            "Error processing image, channels not found. You may have an invalid format." 
+            "Error processing image, channels not found. You may have an invalid format."
           ); // Display error message
           clearState();
         }
@@ -477,63 +471,54 @@ const FileUpload = () => {
         />
       )}
 
+      <label htmlFor="fileElem" className="cursor-pointer">
+        <div
+          id="drop-area"
+          className={`mb-4 border-2 border-dotted border-gray-300 ${
+            highlight ? "bg-gray-100" : "bg-white"
+          } p-6 text-center hover:border-blue-500 hover:shadow-md transition-all duration-300`}
+          onDragEnter={handleDrag}
+          onDragOver={(e) => {
+            handleDrag(e);
+            setHighlight(true);
+          }}
+          onDragLeave={(e) => {
+            handleDrag(e);
+            setHighlight(false);
+          }}
+          onDrop={handleDrop}
+        >
+          <input
+            type="file"
+            id="fileElem"
+            multiple
+            accept="image/*, image/tiff"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={(e) => {
+              if (e.target.files) {
+                handleFiles(e.target.files);
+              }
+            }}
+          />
 
+          <div className="flex flex-col items-center justify-center">
+            {/* <img src="upload_icon.svg" alt="Upload" className="h-8 w-8 mb-2" /> */}
+            <p className="text-xl font-light text-gray-800">Upload File</p>
+            <p className="text-sm text-gray-500 mt-2">
+              Drag and drop, or click to browse
+            </p>
+          </div>
 
-<label htmlFor="fileElem" className="cursor-pointer">
-  <div
-    id="drop-area"
-    className={`mb-4 border-2 border-dotted border-gray-300 ${
-      highlight ? "bg-gray-100" : "bg-white"
-    } p-6 text-center hover:border-blue-500 hover:shadow-md transition-all duration-300`}
-    onDragEnter={handleDrag}
-    onDragOver={(e) => {
-      handleDrag(e);
-      setHighlight(true);
-    }}
-    onDragLeave={(e) => {
-      handleDrag(e);
-      setHighlight(false);
-    }}
-    onDrop={handleDrop}
-  >
-    <input
-      type="file"
-      id="fileElem"
-      multiple
-      accept="image/*, image/tiff"
-      className="hidden"
-      ref={fileInputRef}
-      onChange={(e) => {
-        if (e.target.files) {
-          handleFiles(e.target.files);
-        }
-      }}
-    />
-
-    <div className="flex flex-col items-center justify-center">
-      {/* <img src="upload_icon.svg" alt="Upload" className="h-8 w-8 mb-2" /> */}
-      <p className="text-xl font-light text-gray-800">Upload File</p>
-      <p className="text-sm text-gray-500 mt-2">Drag and drop, or click to browse</p>
-    </div>
-
-    <button
-      type="button"
-      className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-full shadow transition-transform duration-300 hover:-translate-y-1"
-      onClick={() => setShowGalleryModal(true)}
-    >
-      Open Gallery
-    </button>
-  </div>
-</label>
-
-
-
-
-
-
-
-
-
+          <button
+            type="button"
+            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-full shadow transition-transform duration-300 hover:-translate-y-1"
+            onClick={() => setShowGalleryModal(true)}
+          >
+            Open Gallery
+          </button>
+        </div>
+      </label>
 
       {/* GalleryModal component */}
       <LoadGalleryModal
