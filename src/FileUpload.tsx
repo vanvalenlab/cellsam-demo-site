@@ -10,7 +10,7 @@ import { walkUpBindingElementsAndPatterns } from "typescript";
 //
 // ... other necessary imports ...
 // Use this endpoint
-const endpoint = "https://valen-bgmt2kuix.brevlab.com";
+const endpoint = "https://valen-cs-r2ocj3un5.brevlab.com";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
