@@ -146,7 +146,7 @@ function App() {
                 {" "}
                 DeepCell ecosystem
               </a>
-              . The datasets used to train CellSAM are publicly available <a href="https://storage.googleapis.com/cellsam-bebi205/dataset/dataset.tar.gz" download="dataset.tar.gz" style={{color: "#4A90E2", textDecoration: "none", fontWeight: "bold"}}>here</a>.
+              . The datasets used to train CellSAM are publicly available <a href="https://storage.googleapis.com/cellsam-data/dataset.tar.gz" download="dataset.tar.gz" style={{color: "#4A90E2", textDecoration: "none", fontWeight: "bold"}}>here</a>.
             </p>
           </section>
         </section>
