@@ -10,7 +10,8 @@ import { walkUpBindingElementsAndPatterns } from "typescript";
 //
 // ... other necessary imports ...
 // Use this endpoint
-const endpoint = "https://valen-cs-r2ocj3un5.brevlab.com";
+// const endpoint = "https://valen-cs-r2ocj3un5.brevlab.com";
+const endpoint = "http://131.215.2.187:8002";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
@@ -166,7 +167,14 @@ const FileUpload = () => {
 
       // Use the handleFiles function
       setShowGalleryModal(false);
-      handleFiles(simulatedFileList);
+      // hack -- just need this to work for one file list. I am on a flight and need a quick patch
+      if (imageSrc == "tissuenet.png") {
+        const prespecifiedChannels: ChannelType[] = ['blank', 'nuclear', 'wholecell'];
+        handleFiles(simulatedFileList, prespecifiedChannels);
+      } else {
+        handleFiles(simulatedFileList);
+      }
+      
     } catch (error) {
       console.error("Error fetching selected image:", error);
       // Handle the error appropriately
@@ -213,7 +221,7 @@ const FileUpload = () => {
   }, []);
 
   const handleFiles = useCallback(
-    async (files: FileList) => {
+    async (files: FileList, prespecifiedChannels: ChannelType[] = []) => {
       const file = files[0];
       setOverlayImage(null);
       setOverlayMask(null);
@@ -239,16 +247,20 @@ const FileUpload = () => {
         });
         const data = await response.json();
 
-        if (data.channels) {
-          setChannelSelections(
-            new Array(data.channels).fill(channelOptions[0]) as ChannelType[]
-          );
+        if (prespecifiedChannels.length > 0) {
+          setChannelSelections(prespecifiedChannels);
         } else {
-          // Handle unknown or unsupported image formats
-          setErrorMessage(
-            "Error processing image, channels not found. You may have an invalid format."
-          ); // Display error message
-          clearState();
+          if (data.channels) {
+            setChannelSelections(
+              new Array(data.channels).fill(channelOptions[0]) as ChannelType[]
+            );
+          } else {
+            // Handle unknown or unsupported image formats
+            setErrorMessage(
+              "Error processing image, channels not found. You may have an invalid format."
+            ); // Display error message
+            clearState();
+          }
         }
       } catch (error) {
         setErrorMessage(
