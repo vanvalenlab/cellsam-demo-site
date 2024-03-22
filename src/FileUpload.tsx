@@ -553,7 +553,7 @@ const FileUpload = () => {
       {(uploadedImageFile || overlayImage) && (
         <>
           <div className="flex flex-row justify-center items-center">
-            <div className="flex flex-col pt-5">
+            <div className="flex flex-col pt-5 max-w-[80%]"> {/* max width prevents overlfow, but zooms in. */}
               {renderSpinner()} {/* Render the spinner */}
               {/* Update this condition to check both uploadedImageFile and overlayImage */}
               <div className="relative w-[fit-content] max-w-[100%] max-h-[70vh] overflow-auto flex justify-center items-center">
