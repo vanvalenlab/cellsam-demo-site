@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Analytics } from "@vercel/analytics/react"
+
 import FileUpload from "./FileUpload";
 import Header from "./Header";
 import GalleryModal from "./GalleryModal";
