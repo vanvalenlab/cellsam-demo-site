@@ -12,6 +12,7 @@
     "@types/node": "^16.11.26",
     "@types/react": "^17.0.41",
     "@types/react-dom": "^17.0.14",
+    "@vercel/analytics": "^1.2.2",
     "axios": "^1.6.2",
     "heroicons": "^2.0.18",
     "jimp": "^0.22.10",
