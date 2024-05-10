@@ -104,6 +104,7 @@ function App() {
                 marginTop: "20px",
               }}
             >
+             
               <strong style={{ fontSize: "22px", color: "#2A2A2A" }}>
                 CellSAM
               </strong>{" "}
@@ -149,6 +150,11 @@ function App() {
                 DeepCell ecosystem
               </a>
               . The datasets used to train CellSAM are publicly available <a href="https://storage.googleapis.com/cellsam-data/dataset.tar.gz" download="dataset.tar.gz" style={{color: "#4A90E2", textDecoration: "none", fontWeight: "bold"}}>here</a>.
+            </p>
+
+              <hr style={{ border: "1px solid #e2e8f0", margin: "20px 0" }} />
+            <p>
+              <strong style={{ fontSize: "16px", color: "#2A2A2A" }}> DeepCell Label integration is temporarily down for maintenance. </strong>
             </p>
           </section>
         </section>
