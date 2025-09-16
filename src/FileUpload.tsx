@@ -10,8 +10,8 @@ import { walkUpBindingElementsAndPatterns } from "typescript";
 //
 // ... other necessary imports ...
 // Use this endpoint
-// const endpoint = "http://131.215.2.187:8002";
-const endpoint = "https://valen-cs-r2ocj3un5.brevlab.com";
+const endpoint = "http://localhost:8002";
+// const endpoint = "https://valen-cs-r2ocj3un5.brevlab.com";
 
 
 function classNames(...classes: any) {
