@@ -341,7 +341,7 @@ const FileUpload = () => {
     try {
       const formData = new FormData();
       formData.append("image_file", uploadedImageFile); // append the file directly, not as a binary string
-      formData.append("embedding_file", "");
+      formData.append("embedding_file", uploadedImageFile); //NOTE: Hack to get around API errors
       formData.append("bounding_boxes", JSON.stringify(boundingBoxes));
       updateFormData(formData);
 
