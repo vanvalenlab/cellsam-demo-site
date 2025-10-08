@@ -10,8 +10,8 @@ import { walkUpBindingElementsAndPatterns } from "typescript";
 //
 // ... other necessary imports ...
 // Use this endpoint
-// const endpoint = "http://131.215.2.187:8002";
-const endpoint = "https://valen-cs-r2ocj3un5.brevlab.com";
+const endpoint = "http://localhost:8002";
+// const endpoint = "https://valen-cs-r2ocj3un5.brevlab.com";
 
 
 function classNames(...classes: any) {
@@ -341,7 +341,7 @@ const FileUpload = () => {
     try {
       const formData = new FormData();
       formData.append("image_file", uploadedImageFile); // append the file directly, not as a binary string
-      formData.append("embedding_file", "");
+      formData.append("embedding_file", uploadedImageFile); //NOTE: Hack to get around API errors
       formData.append("bounding_boxes", JSON.stringify(boundingBoxes));
       updateFormData(formData);
 
@@ -411,58 +411,6 @@ const FileUpload = () => {
         fileInputRef.current.value = "";
       }
     }
-  };
-
-  const uploadFilesToDCL = async () => {
-    if (!uploadedImageFile || !maskFileObject) return;
-
-    setIsLoading(true);
-    try {
-      const formData = new FormData();
-
-      formData.append("image_file", uploadedImageFile); // append the file directly, not as a binary string
-      formData.append("mask_file", maskFileObject);
-
-      const response = await fetch(endpoint + "/upload_files/", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const imageBlobName = data.image_blob_name;
-        const maskBlobName = data.mask_blob_name;
-
-        var formDataDCL = new FormData();
-        formDataDCL.append("images", imageBlobName);
-        formDataDCL.append("labels", maskBlobName);
-        formDataDCL.append("axes", "YXC");
-
-        const baseUrl = "https://label.deepcell.org";
-        axios({
-          method: "post",
-          url: baseUrl + "/api/project",
-          data: formDataDCL,
-          headers: { "Content-Type": "multipart/form-data" },
-        })
-          .then((res) => {
-            // Open the response URL in a new tab/window
-            console.log(res.data);
-            window.open(`${baseUrl}/project?projectId=${res.data}`, "_blank");
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      } else {
-        const errorText = await response.text();
-        console.error("Error passing data to DeepCell.", errorText);
-        setErrorMessage(errorText);
-      }
-    } catch (error) {
-      setErrorMessage(`Error passing data to DeepCell: ${error}`);
-    }
-
-    setIsLoading(false);
   };
 
   const clearBoundingBoxes = () => {
@@ -614,13 +562,6 @@ const FileUpload = () => {
                 disabled={isLoading}
               >
                 Compute Mask
-              </button>
-              <button
-                onClick={uploadFilesToDCL}
-                className="button-base dcl-upload-button"
-                disabled={isLoading || !maskFileObject}
-              >
-                Open in DCL
               </button>
             </div>
           </>
