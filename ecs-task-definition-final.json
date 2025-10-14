@@ -4,11 +4,11 @@
     "requiresCompatibilities": ["FARGATE"],
     "cpu": "256",
     "memory": "512",
-    "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ecsTaskExecutionRole",
+    "executionRoleArn": "arn:aws:iam::624752675753:role/ecsTaskExecutionRole",
     "containerDefinitions": [
         {
             "name": "cellsam-demo-site",
-            "image": "<AWS_ACCOUNT_ID>.dkr.ecr.us-west-1.amazonaws.com/cellsam-demo-site:latest",
+            "image": "624752675753.dkr.ecr.us-west-1.amazonaws.com/cellsam-demo-site:latest",
             "portMappings": [
                 {
                     "containerPort": 80,
