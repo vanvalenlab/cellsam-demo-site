@@ -5,10 +5,14 @@
 
 set -e
 
-AWS_PROFILE="cellsam"
-AWS_REGION="us-west-1"
+# Configuration - Update these values for your deployment
+AWS_PROFILE="${AWS_PROFILE:-cellsam}"
+AWS_REGION="${AWS_REGION:-us-west-1}"
+PROJECT_NAME="${PROJECT_NAME:-cellsam-demo-site}"
 
 echo "🚀 Starting complete ECS Fargate deployment in $AWS_REGION..."
+echo "📋 Project: $PROJECT_NAME"
+echo "👤 AWS Profile: $AWS_PROFILE"
 
 # Get AWS Account ID
 echo "📋 Getting AWS Account ID..."
@@ -18,7 +22,7 @@ echo "AWS Account ID: $AWS_ACCOUNT_ID"
 # Step 1: Create ECR Repository
 echo "📦 Creating ECR repository..."
 aws ecr create-repository \
-    --repository-name cellsam-demo-site \
+    --repository-name $PROJECT_NAME \
     --region $AWS_REGION \
     --profile $AWS_PROFILE || echo "Repository may already exist"
 
@@ -27,26 +31,29 @@ echo "🔨 Building and pushing Docker image..."
 aws ecr get-login-password --region $AWS_REGION --profile $AWS_PROFILE | \
     docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
-docker build --platform linux/amd64 -t cellsam-demo-site .
-docker tag cellsam-demo-site:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/cellsam-demo-site:latest
-docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/cellsam-demo-site:latest
+docker build --platform linux/amd64 -t $PROJECT_NAME .
+docker tag $PROJECT_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$PROJECT_NAME:latest
+docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$PROJECT_NAME:latest
 
 echo "✅ Docker image pushed successfully!"
 
-# Step 3: Update Task Definition with Account ID
+# Step 3: Update Task Definition with Account ID and other variables
 echo "📝 Creating final task definition..."
-sed "s/<AWS_ACCOUNT_ID>/$AWS_ACCOUNT_ID/g" ecs-task-definition.json > ecs-task-definition-final.json
+sed -e "s/<AWS_ACCOUNT_ID>/$AWS_ACCOUNT_ID/g" \
+    -e "s/<AWS_REGION>/$AWS_REGION/g" \
+    -e "s/<PROJECT_NAME>/$PROJECT_NAME/g" \
+    ecs-task-definition.json > ecs-task-definition-final.json
 
 # Step 4: Create CloudWatch Log Group
 echo "📊 Creating CloudWatch log group..."
 aws logs describe-log-groups \
-    --log-group-name-prefix /ecs/cellsam-demo-site \
+    --log-group-name-prefix /ecs/$PROJECT_NAME \
     --profile $AWS_PROFILE \
     --region $AWS_REGION \
-    --query 'logGroups[?logGroupName==`/ecs/cellsam-demo-site`]' \
+    --query "logGroups[?logGroupName==\`/ecs/$PROJECT_NAME\`]" \
     --output text > /dev/null 2>&1 || {
     aws logs create-log-group \
-        --log-group-name /ecs/cellsam-demo-site \
+        --log-group-name /ecs/$PROJECT_NAME \
         --region $AWS_REGION \
         --profile $AWS_PROFILE
     echo "✅ CloudWatch log group created"
@@ -84,7 +91,7 @@ aws iam get-role --role-name ecsTaskExecutionRole --profile $AWS_PROFILE > /dev/
 # Step 6: Create ECS Cluster
 echo "🏗️ Creating ECS cluster..."
 aws ecs describe-clusters \
-    --clusters cellsam-demo-cluster \
+    --clusters $PROJECT_NAME-cluster \
     --profile $AWS_PROFILE \
     --region $AWS_REGION \
     --query 'clusters[?status==`ACTIVE`]' \
@@ -92,7 +99,7 @@ aws ecs describe-clusters \
     echo "✅ ECS cluster already exists"
 } || {
     aws ecs create-cluster \
-        --cluster-name cellsam-demo-cluster \
+        --cluster-name $PROJECT_NAME-cluster \
         --capacity-providers FARGATE \
         --default-capacity-provider-strategy capacityProvider=FARGATE,weight=1 \
         --region $AWS_REGION \
@@ -271,7 +278,7 @@ echo "🔒 Creating security groups..."
 
 # Create or find ALB security group
 EXISTING_ALB_SG_ID=$(aws ec2 describe-security-groups \
-    --filters "Name=group-name,Values=cellsam-alb-sg" "Name=vpc-id,Values=$VPC_ID" \
+    --filters "Name=group-name,Values=$PROJECT_NAME-alb-sg" "Name=vpc-id,Values=$VPC_ID" \
     --profile $AWS_PROFILE \
     --region $AWS_REGION \
     --query 'SecurityGroups[0].GroupId' \
@@ -282,7 +289,7 @@ if [ "$EXISTING_ALB_SG_ID" != "None" ] && [ "$EXISTING_ALB_SG_ID" != "" ]; then
     echo "✅ Using existing ALB security group: $ALB_SG_ID"
 else
     ALB_SG_ID=$(aws ec2 create-security-group \
-        --group-name cellsam-alb-sg \
+        --group-name $PROJECT_NAME-alb-sg \
         --description "Security group for ALB" \
         --vpc-id $VPC_ID \
         --profile $AWS_PROFILE \
@@ -303,7 +310,7 @@ fi
 
 # Create or find ECS security group
 EXISTING_ECS_SG_ID=$(aws ec2 describe-security-groups \
-    --filters "Name=group-name,Values=cellsam-ecs-sg" "Name=vpc-id,Values=$VPC_ID" \
+    --filters "Name=group-name,Values=$PROJECT_NAME-ecs-sg" "Name=vpc-id,Values=$VPC_ID" \
     --profile $AWS_PROFILE \
     --region $AWS_REGION \
     --query 'SecurityGroups[0].GroupId' \
@@ -314,7 +321,7 @@ if [ "$EXISTING_ECS_SG_ID" != "None" ] && [ "$EXISTING_ECS_SG_ID" != "" ]; then
     echo "✅ Using existing ECS security group: $ECS_SG_ID"
 else
     ECS_SG_ID=$(aws ec2 create-security-group \
-        --group-name cellsam-ecs-sg \
+        --group-name $PROJECT_NAME-ecs-sg \
         --description "Security group for ECS tasks" \
         --vpc-id $VPC_ID \
         --profile $AWS_PROFILE \
@@ -338,7 +345,7 @@ echo "⚖️ Creating Application Load Balancer..."
 
 # Check if ALB already exists
 EXISTING_ALB_ARN=$(aws elbv2 describe-load-balancers \
-    --names cellsam-demo-alb \
+    --names $PROJECT_NAME-alb \
     --profile $AWS_PROFILE \
     --region $AWS_REGION \
     --query 'LoadBalancers[0].LoadBalancerArn' \
@@ -349,7 +356,7 @@ if [ "$EXISTING_ALB_ARN" != "None" ] && [ "$EXISTING_ALB_ARN" != "" ]; then
     echo "✅ Using existing ALB: $ALB_ARN"
 else
     ALB_ARN=$(aws elbv2 create-load-balancer \
-        --name cellsam-demo-alb \
+        --name $PROJECT_NAME-alb \
         --subnets $SUBNET1_ID $SUBNET2_ID \
         --security-groups $ALB_SG_ID \
         --profile $AWS_PROFILE \
@@ -361,7 +368,7 @@ fi
 
 # Check if target group already exists
 EXISTING_TARGET_GROUP_ARN=$(aws elbv2 describe-target-groups \
-    --names cellsam-demo-tg \
+    --names $PROJECT_NAME-tg \
     --profile $AWS_PROFILE \
     --region $AWS_REGION \
     --query 'TargetGroups[0].TargetGroupArn' \
@@ -372,7 +379,7 @@ if [ "$EXISTING_TARGET_GROUP_ARN" != "None" ] && [ "$EXISTING_TARGET_GROUP_ARN" 
     echo "✅ Using existing target group: $TARGET_GROUP_ARN"
 else
     TARGET_GROUP_ARN=$(aws elbv2 create-target-group \
-        --name cellsam-demo-tg \
+        --name $PROJECT_NAME-tg \
         --protocol HTTP \
         --port 80 \
         --vpc-id $VPC_ID \
@@ -417,8 +424,8 @@ echo "🚀 Creating or updating ECS service..."
 
 # Check if service already exists
 EXISTING_SERVICE=$(aws ecs describe-services \
-    --cluster cellsam-demo-cluster \
-    --services cellsam-demo-service \
+    --cluster $PROJECT_NAME-cluster \
+    --services $PROJECT_NAME-service \
     --profile $AWS_PROFILE \
     --region $AWS_REGION \
     --query 'services[?status==`ACTIVE`]' \
@@ -427,9 +434,9 @@ EXISTING_SERVICE=$(aws ecs describe-services \
 if [ "$EXISTING_SERVICE" != "" ]; then
     echo "✅ Service exists, updating with new task definition..."
     aws ecs update-service \
-        --cluster cellsam-demo-cluster \
-        --service cellsam-demo-service \
-        --task-definition cellsam-demo-site \
+        --cluster $PROJECT_NAME-cluster \
+        --service $PROJECT_NAME-service \
+        --task-definition $PROJECT_NAME \
         --desired-count 2 \
         --force-new-deployment \
         --profile $AWS_PROFILE \
@@ -438,13 +445,13 @@ if [ "$EXISTING_SERVICE" != "" ]; then
 else
     echo "✅ Creating new ECS service..."
     aws ecs create-service \
-        --cluster cellsam-demo-cluster \
-        --service-name cellsam-demo-service \
-        --task-definition cellsam-demo-site \
+        --cluster $PROJECT_NAME-cluster \
+        --service-name $PROJECT_NAME-service \
+        --task-definition $PROJECT_NAME \
         --desired-count 2 \
         --launch-type FARGATE \
         --network-configuration "awsvpcConfiguration={subnets=[$SUBNET1_ID,$SUBNET2_ID],securityGroups=[$ECS_SG_ID],assignPublicIp=ENABLED}" \
-        --load-balancers targetGroupArn=$TARGET_GROUP_ARN,containerName=cellsam-demo-site,containerPort=80 \
+        --load-balancers targetGroupArn=$TARGET_GROUP_ARN,containerName=$PROJECT_NAME,containerPort=80 \
         --profile $AWS_PROFILE \
         --region $AWS_REGION
     echo "✅ ECS service created successfully!"
@@ -466,7 +473,7 @@ echo ""
 echo "⏰ Note: It may take 2-3 minutes for the service to become healthy and start serving traffic."
 echo ""
 echo "🔍 To monitor the deployment:"
-echo "   aws ecs describe-services --cluster cellsam-demo-cluster --services cellsam-demo-service --profile $AWS_PROFILE --region $AWS_REGION"
+echo "   aws ecs describe-services --cluster $PROJECT_NAME-cluster --services $PROJECT_NAME-service --profile $AWS_PROFILE --region $AWS_REGION"
 echo ""
 echo "📊 To view logs:"
-echo "   aws logs tail /ecs/cellsam-demo-site --follow --profile $AWS_PROFILE --region $AWS_REGION"
+echo "   aws logs tail /ecs/$PROJECT_NAME --follow --profile $AWS_PROFILE --region $AWS_REGION"
