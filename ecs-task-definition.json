@@ -1,5 +1,5 @@
 {
-    "family": "cellsam-demo-site",
+    "family": "<PROJECT_NAME>",
     "networkMode": "awsvpc",
     "requiresCompatibilities": ["FARGATE"],
     "cpu": "256",
@@ -7,15 +7,23 @@
     "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ecsTaskExecutionRole",
     "containerDefinitions": [
         {
-            "name": "cellsam-demo-site",
-            "image": "<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/cellsam-demo-site:latest",
+            "name": "<PROJECT_NAME>",
+            "image": "<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/<PROJECT_NAME>:latest",
             "portMappings": [
                 {
                     "containerPort": 80,
                     "protocol": "tcp"
                 }
             ],
-            "essential": true
+            "essential": true,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/<PROJECT_NAME>",
+                    "awslogs-region": "<AWS_REGION>",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
         }
     ]
 }
