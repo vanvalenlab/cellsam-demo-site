@@ -12,7 +12,7 @@ import { walkUpBindingElementsAndPatterns } from "typescript";
 // Use this endpoint
 // const endpoint = "http://localhost:8002";
 // const endpoint = "https://valen-cs-r2ocj3un5.brevlab.com";
-const endpoint = "http://54.176.122.100";
+const endpoint = "https://cellsam-api.deepcell.org";
 
 
 function classNames(...classes: any) {
